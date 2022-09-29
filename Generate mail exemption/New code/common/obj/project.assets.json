@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\User\\Documents\\Projects\\Generate mail exemption\\common\\common.csproj",
+      "projectUniqueName": "C:\\Users\\User\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\common\\common.csproj",
       "projectName": "common",
-      "projectPath": "C:\\Users\\User\\Documents\\Projects\\Generate mail exemption\\common\\common.csproj",
+      "projectPath": "C:\\Users\\User\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\common\\common.csproj",
       "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\User\\Documents\\Projects\\Generate mail exemption\\common\\obj\\",
+      "outputPath": "C:\\Users\\User\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\common\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",

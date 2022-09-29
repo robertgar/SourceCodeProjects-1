@@ -10,3 +10,15 @@ C:\Users\User\Desktop\Generate mail exemption\common\obj\Debug\net6.0\common.dll
 C:\Users\User\Desktop\Generate mail exemption\common\obj\Debug\net6.0\refint\common.dll
 C:\Users\User\Desktop\Generate mail exemption\common\obj\Debug\net6.0\common.pdb
 C:\Users\User\Desktop\Generate mail exemption\common\obj\Debug\net6.0\ref\common.dll
+C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\common\bin\Debug\net6.0\common.deps.json
+C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\common\bin\Debug\net6.0\common.dll
+C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\common\bin\Debug\net6.0\common.pdb
+C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\common\obj\Debug\net6.0\common.csproj.AssemblyReference.cache
+C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\common\obj\Debug\net6.0\common.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\common\obj\Debug\net6.0\common.AssemblyInfoInputs.cache
+C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\common\obj\Debug\net6.0\common.AssemblyInfo.cs
+C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\common\obj\Debug\net6.0\common.csproj.CoreCompileInputs.cache
+C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\common\obj\Debug\net6.0\common.dll
+C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\common\obj\Debug\net6.0\refint\common.dll
+C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\common\obj\Debug\net6.0\common.pdb
+C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\common\obj\Debug\net6.0\ref\common.dll

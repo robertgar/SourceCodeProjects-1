@@ -2,16 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Data;
 
 namespace Principal{
+    internal class AsynClss { }
     internal class Maker{
         private common.UseCommon use = new common.UseCommon();
         private connection.Execute execute = new connection.Execute();
         private DataTable tablita = new DataTable();
 
+        private static Task<Principal> getAsyn() { 
+        }
+
         public void makeAll() {
+            Console.WriteLine("Inicializando...");
             use.query.Clear();
             use.query.AppendLine(" declare @Temp table(AmazonOrder varchar(50))");
             use.query.AppendLine(" insert into @Temp");
@@ -72,6 +76,9 @@ namespace Principal{
 
             execute.fillTable(ref use.query, ref use.tabBuffer);
 
+            Console.WriteLine("Rows: " + use.tabBuffer.Rows.Count.ToString());
+            Console.WriteLine("Columns: " + use.tabBuffer.Rows.Count.ToString());
+
             foreach (DataRow row in use.tabBuffer.Rows) {
                 generateGuide(row);
             }
@@ -113,7 +120,7 @@ namespace Principal{
                 use.query.AppendLine("    CodigoDeRastreo = @AmazonOrder");
                 use.query.AppendLine("    or CodigoDeRastreo like '%' + @AmazonOrder + '%'");
 
-                Console.WriteLine("Updated order with AmazonrOrder: " + row["ShortTraking"].ToString()) ;
+                Console.WriteLine("Updated order with AmazonrOrder: " + row["ShortTracking"].ToString()) ;
                 //execute.executeQuery(ref use.query);
                 return;
             }
@@ -121,6 +128,7 @@ namespace Principal{
             if (tablita.Rows[1]["Counter"].ToString().Equals("0")) { return; }
 
             //Insertarl paquete(codigoPaquete, precio, descripcion...)
+            Console.WriteLine("Insert package with AmazonOrder " + row["ShortTracking"].ToString());
         }
 
         private String getNewGuide() {

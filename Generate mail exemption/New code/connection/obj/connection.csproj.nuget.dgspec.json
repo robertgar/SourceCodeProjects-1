@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\User\\Documents\\Projects\\Generate mail exemption\\connection\\connection.csproj": {}
+    "C:\\Users\\User\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\connection\\connection.csproj": {}
   },
   "projects": {
-    "C:\\Users\\User\\Documents\\Projects\\Generate mail exemption\\common\\common.csproj": {
+    "C:\\Users\\User\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\common\\common.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\User\\Documents\\Projects\\Generate mail exemption\\common\\common.csproj",
+        "projectUniqueName": "C:\\Users\\User\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\common\\common.csproj",
         "projectName": "common",
-        "projectPath": "C:\\Users\\User\\Documents\\Projects\\Generate mail exemption\\common\\common.csproj",
+        "projectPath": "C:\\Users\\User\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\common\\common.csproj",
         "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\User\\Documents\\Projects\\Generate mail exemption\\common\\obj\\",
+        "outputPath": "C:\\Users\\User\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\common\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -58,14 +58,14 @@
         }
       }
     },
-    "C:\\Users\\User\\Documents\\Projects\\Generate mail exemption\\connection\\connection.csproj": {
+    "C:\\Users\\User\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\connection\\connection.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\User\\Documents\\Projects\\Generate mail exemption\\connection\\connection.csproj",
+        "projectUniqueName": "C:\\Users\\User\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\connection\\connection.csproj",
         "projectName": "connection",
-        "projectPath": "C:\\Users\\User\\Documents\\Projects\\Generate mail exemption\\connection\\connection.csproj",
+        "projectPath": "C:\\Users\\User\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\connection\\connection.csproj",
         "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\User\\Documents\\Projects\\Generate mail exemption\\connection\\obj\\",
+        "outputPath": "C:\\Users\\User\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\connection\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -82,8 +82,8 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "C:\\Users\\User\\Documents\\Projects\\Generate mail exemption\\common\\common.csproj": {
-                "projectPath": "C:\\Users\\User\\Documents\\Projects\\Generate mail exemption\\common\\common.csproj"
+              "C:\\Users\\User\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\common\\common.csproj": {
+                "projectPath": "C:\\Users\\User\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\common\\common.csproj"
               }
             }
           }

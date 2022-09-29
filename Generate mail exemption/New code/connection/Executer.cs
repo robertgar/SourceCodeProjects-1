@@ -24,7 +24,7 @@ namespace connection{
 
         public void fillTable(ref StringBuilder query, ref DataTable Tablita) {
             Tablita.Clear();
-
+            
             try{
                 connector.Open();
                 SqlDataAdapter reader = new SqlDataAdapter(query.ToString(), connector);
