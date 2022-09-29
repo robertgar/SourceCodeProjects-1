@@ -1,0 +1,15 @@
+C:\Users\User\Desktop\Generate mail exemption\connection\bin\Debug\net6.0\connection.deps.json
+C:\Users\User\Desktop\Generate mail exemption\connection\bin\Debug\net6.0\connection.dll
+C:\Users\User\Desktop\Generate mail exemption\connection\bin\Debug\net6.0\connection.pdb
+C:\Users\User\Desktop\Generate mail exemption\connection\bin\Debug\net6.0\common.dll
+C:\Users\User\Desktop\Generate mail exemption\connection\bin\Debug\net6.0\common.pdb
+C:\Users\User\Desktop\Generate mail exemption\connection\obj\Debug\net6.0\connection.csproj.AssemblyReference.cache
+C:\Users\User\Desktop\Generate mail exemption\connection\obj\Debug\net6.0\connection.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\User\Desktop\Generate mail exemption\connection\obj\Debug\net6.0\connection.AssemblyInfoInputs.cache
+C:\Users\User\Desktop\Generate mail exemption\connection\obj\Debug\net6.0\connection.AssemblyInfo.cs
+C:\Users\User\Desktop\Generate mail exemption\connection\obj\Debug\net6.0\connection.csproj.CoreCompileInputs.cache
+C:\Users\User\Desktop\Generate mail exemption\connection\obj\Debug\net6.0\connection.csproj.CopyComplete
+C:\Users\User\Desktop\Generate mail exemption\connection\obj\Debug\net6.0\connection.dll
+C:\Users\User\Desktop\Generate mail exemption\connection\obj\Debug\net6.0\refint\connection.dll
+C:\Users\User\Desktop\Generate mail exemption\connection\obj\Debug\net6.0\connection.pdb
+C:\Users\User\Desktop\Generate mail exemption\connection\obj\Debug\net6.0\ref\connection.dll
