@@ -5,17 +5,13 @@ using System.Text;
 using System.Data;
 
 namespace Principal{
-    internal class AsynClss { }
+    internal class ClassAsync { }
     internal class Maker{
         private common.UseCommon use = new common.UseCommon();
         private connection.Execute execute = new connection.Execute();
         private DataTable tablita = new DataTable();
 
-        private static Task<Principal> getAsyn() { 
-        }
-
         public void makeAll() {
-            Console.WriteLine("Inicializando...");
             use.query.Clear();
             use.query.AppendLine(" declare @Temp table(AmazonOrder varchar(50))");
             use.query.AppendLine(" insert into @Temp");
@@ -73,11 +69,8 @@ namespace Principal{
             use.query.AppendLine("    )");
             use.query.AppendLine("    and isnull(sum(case when (cc.NuncaEnviarExencion = 1) then 1 else 0 end), 0) = 0");
             use.query.AppendLine("    and isnull(sum(case when (pe.Cantidad > 0 and pe.CodigoEstadoPedido != 4) then 1 else 0 end), 0) > 0");
-
+            
             execute.fillTable(ref use.query, ref use.tabBuffer);
-
-            Console.WriteLine("Rows: " + use.tabBuffer.Rows.Count.ToString());
-            Console.WriteLine("Columns: " + use.tabBuffer.Rows.Count.ToString());
 
             foreach (DataRow row in use.tabBuffer.Rows) {
                 generateGuide(row);
@@ -86,7 +79,7 @@ namespace Principal{
 
         private void generateGuide(DataRow row) {
             if (row["ProductsReceived"].ToString().Equals("0")) { return; }
-
+            
             use.query.Clear();
             use.query.Append(" declare @AmazonOrder varchar(50) = '").Append(row["ShortTracking"].ToString()).Append("'");
             use.query.AppendLine("    select");
@@ -105,11 +98,11 @@ namespace Principal{
             use.query.AppendLine("    where");
             use.query.AppendLine("        CodigoDeRastreo like '%' + @AmazonOrder + '%'");
             tablita.Clear();
-            execute.fillTable(ref use.query, ref tablita); 
+            execute.fillTable(ref use.query, ref tablita);
 
-            if (!tablita.Rows[0]["Counter"].ToString().Equals("0")) {
+            if (!tablita.Rows[0]["Counter"].ToString().Equals("0")){
                 if (tablita.Rows[1]["Counter"].ToString().Equals("0")) { return; }
-
+                
                 use.query.Clear();
                 use.query.Append(" declare @AmazonOrder varchar(50) = '").Append(row["ShortTracking"].ToString()).Append("'");
                 use.query.AppendLine(" update");
@@ -120,15 +113,16 @@ namespace Principal{
                 use.query.AppendLine("    CodigoDeRastreo = @AmazonOrder");
                 use.query.AppendLine("    or CodigoDeRastreo like '%' + @AmazonOrder + '%'");
 
-                Console.WriteLine("Updated order with AmazonrOrder: " + row["ShortTracking"].ToString()) ;
+                Console.WriteLine("Updated order with AmazonrOrder: " + row["ShortTracking"].ToString());
                 //execute.executeQuery(ref use.query);
                 return;
             }
-
+            
             if (tablita.Rows[1]["Counter"].ToString().Equals("0")) { return; }
-
+            
             //Insertarl paquete(codigoPaquete, precio, descripcion...)
             Console.WriteLine("Insert package with AmazonOrder " + row["ShortTracking"].ToString());
+            return;
         }
 
         private String getNewGuide() {

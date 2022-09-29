@@ -8,7 +8,6 @@ Module Module1
     Dim enviar As New Envio_De_Correos
     Dim MyConString As String
     Dim Consulta As String
-    Dim Tablita As New DataTable
 
 
     Sub Main()
@@ -30,7 +29,9 @@ Module Module1
         Dim Mensaje As String
         Dim ErrorEnviarCorreo, EnviarCopiaExencion As Boolean
         Dim NumSolicitadoTransito, NumSinCancelar As Integer
+        Dim dtDatos, dtCanales As New DataTable
         Dim CanalMostrarAlerta, CanalMostrarAlerta2 As String
+        Dim dtDatosAlerta As New DataTable
 
         Mensaje = ""
         Correo = ""
@@ -42,14 +43,26 @@ Module Module1
         Consulta = "select Valor from Parametro where CodigoParametro = 4" 'correo nivel 1
         CorreoAdministracion1 = mostrar.retornarcadena(Consulta, MyConString)
 
+        'Consulta = "select url from Webhook where CodigoWebhook in (1, 6) order by CodigoWebHook" 'Obtener url canal de Alerta-Sistema y Logística
+        'mostrar.ejecuta_query_dt(Consulta, dtCanales, MyConString)
+        'For Each dr As DataRow In dtCanales.Rows
+        '    If CanalAlertaSistema = "" Then
+        '        CanalAlertaSistema = dr("url").ToString
+        '    Else
+        '        CanalLogistica = dr("url").ToString
+        '    End If
+        'Next
+
+
+
+
         Try
             CanalMostrarAlerta = ""
             Consulta = "select w.Url, isnull(Activo,0) as Activo from Alerta a, Webhook w " &
                     "where a.CodigoWebhook = w.CodigoWebhook " &
                     "and a.CodigoAlerta = 11"
-            Tablita.Clear()
-            mostrar.ejecuta_query_dt(Consulta, Tablita, MyConString)
-            For Each dr As DataRow In Tablita.Rows
+            mostrar.ejecuta_query_dt(Consulta, dtDatosAlerta, MyConString)
+            For Each dr As DataRow In dtDatosAlerta.Rows
                 Dim Activo As Boolean = CBool(dr("Activo").ToString)
                 If Activo = True Then
                     If dr("Url").ToString <> "" Then
@@ -58,150 +71,182 @@ Module Module1
                 End If
             Next
 
+
+            'CanalMostrarAlerta2 = ""
+            'Consulta = "select w.Url, isnull(Activo,0) as Activo from Alerta a, Webhook w " &
+            '        "where a.CodigoWebhook = w.CodigoWebhook " &
+            '        "and a.CodigoAlerta = 211"
+            'mostrar.ejecuta_query_dt(Consulta, dtDatosAlerta, MyConString)
+            'For Each dr As DataRow In dtDatosAlerta.Rows
+            '    Dim Activo As Boolean = CBool(dr("Activo").ToString)
+            '    If Activo = True Then
+            '        If dr("Url").ToString <> "" Then
+            '            CanalMostrarAlerta2 = dr("Url").ToString
+            '        End If
+            '    End If
+            'Next
+
+
             Consulta = "select OrdenDeAmazon from OrdenDeCompra where CorreoDeExencion is null"
-            Tablita.Clear()
-            mostrar.ejecuta_query_dt(Consulta, Tablita, MyConString)
+            '+ " and OrdenDeAmazon in ('111-7522933-4033001')" 'quitar la orden de amazon
 
-            For Each row As DataRow In Tablita.Rows
-                OrdenDeAmazon = row("OrdenDeAmazon").ToString
+            Using mySqlConnection2 As New System.Data.SqlClient.SqlConnection(MyConString)
 
-                If OrdenDeAmazon <> "" Then
-                    ListaGuias = ""
-                    ListaImpuestos = ""
-                    TotalImpuesto = 0
-                    ArchivosAdjuntos = ""
-                    Mensaje = ""
+                mySqlConnection2.Open()
+                Dim mySqlCommand2 As New System.Data.SqlClient.SqlCommand(Consulta, mySqlConnection2)
+                Dim myDataReader2 As Data.SqlClient.SqlDataReader
+                myDataReader2 = mySqlCommand2.ExecuteReader()
 
-                    'verifica si hay líneas de pedido en solicitado, tránsito o pendiente, si hay no genera guía ni envía el correo
-                    Consulta = "select COUNT(1) from Pedido where OrdenDeAmazon = '" & OrdenDeAmazon & "' and CodigoEstadoPedido in (1,2,6) and Cantidad > 0"
-                    NumSolicitadoTransito = mostrar.retornarentero(Consulta, MyConString)
+                Do While myDataReader2.Read()
+                    OrdenDeAmazon = ""
+                    If myDataReader2.IsDBNull(0) = False Then
+                        OrdenDeAmazon = myDataReader2.GetString(0)
+                    End If
 
-                    If NumSolicitadoTransito = 0 Then 'aqui
-                        'obtiene el impuesto a pagar de la órden de amazon
-                        Consulta = "select isnull(SUM(Impuesto),0) as Impuesto from Pedido  where OrdenDeAmazon = '" & OrdenDeAmazon & "' and CodigoDeRastreo is not null "
-                        TotalImpuesto = mostrar.retornardecimal(Consulta, MyConString)
+                    If OrdenDeAmazon <> "" Then
+                        'verifica si hay lineas con Shipment planned o Shipping soon, si hay no envía correo
+                        'Consulta = "select COUNT(*)  from Pedido where OrdenDeAmazon = '" & OrdenDeAmazon & "' and (EstadoDeLaOrden = 'Shipment planned' or EstadoDeLaOrden = 'Shipping soon') "
+                        'If mostrar.retornarentero(Consulta, MyConString) = 0 Then
 
-                        Consulta = "select COUNT(1) from Pedido where OrdenDeAmazon = '" & OrdenDeAmazon & "' and Cantidad > 0 and CodigoEstadoPedido <> 4 "
-                        NumSinCancelar = mostrar.retornarentero(Consulta, MyConString)
+                        ListaGuias = ""
+                        ListaImpuestos = ""
+                        TotalImpuesto = 0
+                        ArchivosAdjuntos = ""
+                        Mensaje = ""
 
-                        'si el correo tiene SiempreEnviarExencion = 1, aunque totalimpuesto = 0 se envía el correo
-                        Consulta = "select COUNT(1) from CuentaDeCompra where Correo in ( " &
-                                "select distinct Correo from Pedido where OrdenDeAmazon = '" & OrdenDeAmazon & "' and Correo is not null " &
-                                ") and SiempreEnviarExencion = 1 "
+                        'verifica si hay líneas de pedido en solicitado, tránsito o pendiente, si hay no genera guía ni envía el correo
+                        Consulta = "select COUNT(1) from Pedido where OrdenDeAmazon = '" & OrdenDeAmazon & "' and CodigoEstadoPedido in (1,2,6) and Cantidad > 0"
+                        NumSolicitadoTransito = mostrar.retornarentero(Consulta, MyConString)
 
-                        'si el correo tiene NuncaEnviarExencion = 1, aunque totalimpuesto > 0 no se envía el correo
-                        Consulta2 = "select COUNT(1) from CuentaDeCompra where Correo in ( " &
-                                "select distinct Correo from Pedido where OrdenDeAmazon = '" & OrdenDeAmazon & "' and Correo is not null " &
-                                ") and NuncaEnviarExencion = 1 "
+                        If NumSolicitadoTransito = 0 Then 'aqui
+                            'obtiene el impuesto a pagar de la órden de amazon
+                            Consulta = "select isnull(SUM(Impuesto),0) as Impuesto from Pedido  where OrdenDeAmazon = '" & OrdenDeAmazon & "' and CodigoDeRastreo is not null "
+                            TotalImpuesto = mostrar.retornardecimal(Consulta, MyConString)
 
-                        If ((TotalImpuesto > 0 Or mostrar.retornarentero(Consulta, MyConString) > 0)) And mostrar.retornarentero(Consulta2, MyConString) = 0 And NumSinCancelar > 0 Then
+                            Consulta = "select COUNT(1) from Pedido where OrdenDeAmazon = '" & OrdenDeAmazon & "' and Cantidad > 0 and CodigoEstadoPedido <> 4 "
+                            NumSinCancelar = mostrar.retornarentero(Consulta, MyConString)
 
-                            Generar_Guias(OrdenDeAmazon)
+                            'si el correo tiene SiempreEnviarExencion = 1, aunque totalimpuesto = 0 se envía el correo
+                            Consulta = "select COUNT(1) from CuentaDeCompra where Correo in ( " &
+                                    "select distinct Correo from Pedido where OrdenDeAmazon = '" & OrdenDeAmazon & "' and Correo is not null " &
+                                    ") and SiempreEnviarExencion = 1 "
 
-                            If VerificarPaquete(OrdenDeAmazon, ListaGuias, ListaImpuestos) = True Then
+                            'si el correo tiene NuncaEnviarExencion = 1, aunque totalimpuesto > 0 no se envía el correo
+                            Consulta2 = "select COUNT(1) from CuentaDeCompra where Correo in ( " &
+                                    "select distinct Correo from Pedido where OrdenDeAmazon = '" & OrdenDeAmazon & "' and Correo is not null " &
+                                    ") and NuncaEnviarExencion = 1 "
 
-                                Exito = True
-                                texto = Split(ListaGuias, ",")
-                                vectorImpuestos = Split(ListaImpuestos, ",")
-                                For i = 0 To texto.Length - 1
-                                    'verifica si hay alguna línea en el tracking que no haya sido cancelada y tengan cantidad, si todas las líneas del tracking están canceladas no genera el pdf de ese tracking
-                                    Consulta = "select COUNT(1) from Pedido pe, Paquete pa where pe.CodigoPaquete = pa.CodigoPaquete and GuiaAerea = '" & texto(i) & "' and Cantidad > 0 and CodigoEstadoPedido <> 4 "
-                                    If mostrar.retornarentero(Consulta, MyConString) > 0 Then 'genera el pdf
-                                        If Exito = True Then
-                                            NombreArchivo = ""
-                                            Dim FormGuia As New GuiaPdf
-                                            Exito = FormGuia.Crear_Reporte_Pdf(texto(i), NombreArchivo, MyConString, Mensaje)
-                                            If NombreArchivo <> "" Then
-                                                If ArchivosAdjuntos = "" Then
-                                                    ArchivosAdjuntos = NombreArchivo
-                                                Else
-                                                    If InStr(ArchivosAdjuntos, NombreArchivo) = 0 Then
-                                                        ArchivosAdjuntos = ArchivosAdjuntos + "," + NombreArchivo
+                            If ((TotalImpuesto > 0 Or mostrar.retornarentero(Consulta, MyConString) > 0)) And mostrar.retornarentero(Consulta2, MyConString) = 0 And NumSinCancelar > 0 Then
+
+                                Generar_Guias(OrdenDeAmazon)
+
+                                If VerificarPaquete(OrdenDeAmazon, ListaGuias, ListaImpuestos) = True Then
+
+                                    Exito = True
+                                    texto = Split(ListaGuias, ",")
+                                    vectorImpuestos = Split(ListaImpuestos, ",")
+                                    For i = 0 To texto.Length - 1
+                                        'verifica si hay alguna línea en el tracking que no haya sido cancelada y tengan cantidad, si todas las líneas del tracking están canceladas no genera el pdf de ese tracking
+                                        Consulta = "select COUNT(1) from Pedido pe, Paquete pa where pe.CodigoPaquete = pa.CodigoPaquete and GuiaAerea = '" & texto(i) & "' and Cantidad > 0 and CodigoEstadoPedido <> 4 "
+                                        If mostrar.retornarentero(Consulta, MyConString) > 0 Then 'genera el pdf
+                                            If Exito = True Then
+                                                NombreArchivo = ""
+                                                Dim FormGuia As New GuiaPdf
+                                                Exito = FormGuia.Crear_Reporte_Pdf(texto(i), NombreArchivo, MyConString, Mensaje)
+                                                If NombreArchivo <> "" Then
+                                                    If ArchivosAdjuntos = "" Then
+                                                        ArchivosAdjuntos = NombreArchivo
+                                                    Else
+                                                        If InStr(ArchivosAdjuntos, NombreArchivo) = 0 Then
+                                                            ArchivosAdjuntos = ArchivosAdjuntos + "," + NombreArchivo
+                                                        End If
+
                                                     End If
-
                                                 End If
-                                            End If
 
-                                        End If
-                                    End If
-                                Next
-
-                                If Exito = True Then
-
-                                    Consulta = "select COUNT(*) from Pedido where OrdenDeAmazon = '" & OrdenDeAmazon & "' and Correo is not null"
-                                    If mostrar.retornarentero(Consulta, MyConString) > 0 Then
-
-                                        Correo = ""
-                                        Consulta = "select top(1) isnull(pe.Correo,'') as Correo, isnull(cc.EnviarCopiaExencion,0) as EnviarCopiaExencion from Pedido pe, CuentaDeCompra cc where pe.Correo = cc.Correo and OrdenDeAmazon = '" & OrdenDeAmazon & "' and pe.Correo is not null"
-                                        Tablita.Clear()
-                                        mostrar.ejecuta_query_dt(Consulta, Tablita, MyConString)
-                                        For Each dr As DataRow In Tablita.Rows
-                                            Correo = dr("Correo").ToString
-                                            EnviarCopiaExencion = CBool(dr("EnviarCopiaExencion").ToString)
-                                            If EnviarCopiaExencion = True Then
-                                                CorreoCopia = CorreoAdministracion1
-                                            Else
-                                                CorreoCopia = ""
-                                            End If
-
-                                        Next
-
-
-                                        'enviar correo
-                                        Subject = "Tax exempt for " & Correo
-
-                                        Contenido = "Good day, attached proof of export.<br/><br/>" &
-                                            "E-mail account: " & Correo & "<br/>" &
-                                            "Order numbers:<br/>" &
-                                            OrdenDeAmazon & "<br/><br/><br/>" &
-                                            "Best Regards,<br/>" &
-                                            "Mario Porres<br/><br/>"
-
-
-                                        If ArchivosAdjuntos <> "" Then
-                                            If enviar.Enviar_Correo_Con_Attachment_Verificar_Error(Correo, "tax-exempt@amazon.com", Subject, Contenido, CorreoCopia, ArchivosAdjuntos) = True Then
-                                                'actualizar campo CorreoDeExencion
-                                                Consulta = "Update OrdenDeCompra set CorreoDeExencion = GETDATE() Where OrdenDeAmazon = '" & OrdenDeAmazon & "'"
-                                                mostrar.insertarmodificareliminar(Consulta, MyConString)
-                                            Else
-
-                                                Subject = "Error al enviar el correo en el procedimiento Correo Exencion "
-                                                Contenido = "Error procedimiento Correo Exencion al enviar el correo desde: " + Correo + ", Orden de Amazon: " + OrdenDeAmazon + "<br/><br/>" + Contenido
-
-                                                If CanalMostrarAlerta <> "" Then
-                                                    EnviarAlertaSlackPromocion("ALERTA-EXENCION", Contenido, Subject, "Generar_CorreoExencion", CanalMostrarAlerta)
-                                                End If
-                                                'enviar.Enviar_Correo("cpx@guatemaladigital.net", CorreoAdministracion1, Subject, Contenido, "")
-                                                'enviar.Enviar_Correo("cpx@guatemaladigital.net", "archivoslab@yahoo.es", Subject, Contenido, "")
                                             End If
                                         End If
+                                    Next
+
+                                    If Exito = True Then
+
+                                        Consulta = "select COUNT(*) from Pedido where OrdenDeAmazon = '" & OrdenDeAmazon & "' and Correo is not null"
+                                        If mostrar.retornarentero(Consulta, MyConString) > 0 Then
+
+                                            Correo = ""
+                                            Consulta = "select top(1) isnull(pe.Correo,'') as Correo, isnull(cc.EnviarCopiaExencion,0) as EnviarCopiaExencion from Pedido pe, CuentaDeCompra cc where pe.Correo = cc.Correo and OrdenDeAmazon = '" & OrdenDeAmazon & "' and pe.Correo is not null"
+                                            mostrar.ejecuta_query_dt(Consulta, dtDatos, MyConString)
+                                            For Each dr As DataRow In dtDatos.Rows
+                                                Correo = dr("Correo").ToString
+                                                EnviarCopiaExencion = CBool(dr("EnviarCopiaExencion").ToString)
+                                                If EnviarCopiaExencion = True Then
+                                                    CorreoCopia = CorreoAdministracion1
+                                                Else
+                                                    CorreoCopia = ""
+                                                End If
+
+                                            Next
+
+
+                                            'enviar correo
+                                            Subject = "Tax exempt for " & Correo
+
+                                            Contenido = "Good day, attached proof of export.<br/><br/>" &
+                                                "E-mail account: " & Correo & "<br/>" &
+                                                "Order numbers:<br/>" &
+                                                OrdenDeAmazon & "<br/><br/><br/>" &
+                                                "Best Regards,<br/>" &
+                                                "Mario Porres<br/><br/>"
+
+
+                                            If ArchivosAdjuntos <> "" Then
+                                                If enviar.Enviar_Correo_Con_Attachment_Verificar_Error(Correo, "tax-exempt@amazon.com", Subject, Contenido, CorreoCopia, ArchivosAdjuntos) = True Then
+                                                    'actualizar campo CorreoDeExencion
+                                                    Consulta = "Update OrdenDeCompra set CorreoDeExencion = GETDATE() Where OrdenDeAmazon = '" & OrdenDeAmazon & "'"
+                                                    mostrar.insertarmodificareliminar(Consulta, MyConString)
+                                                Else
+
+                                                    Subject = "Error al enviar el correo en el procedimiento Correo Exencion "
+                                                    Contenido = "Error procedimiento Correo Exencion al enviar el correo desde: " + Correo + ", Orden de Amazon: " + OrdenDeAmazon + "<br/><br/>" + Contenido
+
+                                                    If CanalMostrarAlerta <> "" Then
+                                                        EnviarAlertaSlackPromocion("ALERTA-EXENCION", Contenido, Subject, "Generar_CorreoExencion", CanalMostrarAlerta)
+                                                    End If
+                                                    'enviar.Enviar_Correo("cpx@guatemaladigital.net", CorreoAdministracion1, Subject, Contenido, "")
+                                                    'enviar.Enviar_Correo("cpx@guatemaladigital.net", "archivoslab@yahoo.es", Subject, Contenido, "")
+                                                End If
+                                            End If
+                                        End If
+                                    Else 'Tarea 245
+                                        Subject = "Error procedimiento Correo de Exencion"
+                                        Contenido = "Orden Amazon: " + OrdenDeAmazon + ", " + Mensaje
+                                        'enviar.Enviar_Correo("cpx@guatemaladigital.net", "archivoslab@yahoo.es", Subject, Contenido, "")
+                                        If CanalMostrarAlerta <> "" Then
+                                            EnviarAlertaSlackPromocion("ALERTA-EXENCION", Contenido, Subject, "Generar_CorreoExencion", CanalMostrarAlerta)
+                                        End If
+
                                     End If
-                                Else 'Tarea 245
-                                    Subject = "Error procedimiento Correo de Exencion"
-                                    Contenido = "Orden Amazon: " + OrdenDeAmazon + ", " + Mensaje
-                                    'enviar.Enviar_Correo("cpx@guatemaladigital.net", "archivoslab@yahoo.es", Subject, Contenido, "")
-                                    If CanalMostrarAlerta <> "" Then
-                                        EnviarAlertaSlackPromocion("ALERTA-EXENCION", Contenido, Subject, "Generar_CorreoExencion", CanalMostrarAlerta)
-                                    End If
 
-                                End If
+                                End If ' if verificar paquete
 
-                            End If ' if verificar paquete
+                            Else
+                                'como la suma de impuestos = 0, no se envía correo solo se actualiza campo CorreoDeExencion
+                                'actualizar campo CorreoDeExencion 
+                                'Consulta = "Update OrdenDeCompra set CorreoDeExencion = GETDATE() Where OrdenDeAmazon = '" & OrdenDeAmazon & "'"
+                                'mostrar.insertarmodificareliminar(Consulta, MyConString)
 
-                        Else
-                            'como la suma de impuestos = 0, no se envía correo solo se actualiza campo CorreoDeExencion
-                            'actualizar campo CorreoDeExencion 
-                            'Consulta = "Update OrdenDeCompra set CorreoDeExencion = GETDATE() Where OrdenDeAmazon = '" & OrdenDeAmazon & "'"
-                            'mostrar.insertarmodificareliminar(Consulta, MyConString)
+                            End If 'if totalimpuesto <> 0
 
-                        End If 'if totalimpuesto <> 0
+                        End If 'NumSolicitadoTransito
 
-                    End If 'NumSolicitadoTransito
+                        'End If 'if verifica si hay lineas con Shipment planned o Shipping soon, si hay no envía correo
+                    End If 'if orden de amazon
 
-                    'End If 'if verifica si hay lineas con Shipment planned o Shipping soon, si hay no envía correo
-                End If 'if orden de amazon
+                Loop
 
-            Next
+                myDataReader2.Close()
+                mySqlConnection2.Close()
+            End Using
 
         Catch ex As Exception
 
@@ -434,98 +479,149 @@ Module Module1
         Consulta = "select distinct pe.CodigoDeRastreo, (select COUNT(*) from Pedido where CodigoEstadoPedido = 3 and CodigoDeRastreo = pe.CodigoDeRastreo) as Recibidos, " &
              "case when CHARINDEX('(', pe.CodigoDeRastreo) > 0 and CHARINDEX(')', pe.CodigoDeRastreo) > 0 then SUBSTRING(pe.CodigoDeRastreo,CHARINDEX('(', pe.CodigoDeRastreo) + 1, CHARINDEX(')', pe.CodigoDeRastreo) - CHARINDEX('(', pe.CodigoDeRastreo) - 1) else pe.CodigoDeRastreo end as TrackingCorto " &
              "from Pedido pe where pe.OrdenDeAmazon = '" & OrdenDeAmazon & "' and CodigoDeRastreo is not null and CodigoEstadoPedido <> 4 "
-        Tablita.Clear()
-        mostrar.ejecuta_query_dt(Consulta, Tablita, MyConString)
 
+        Using mySqlConnection2 As New System.Data.SqlClient.SqlConnection(MyConString)
+            mySqlConnection2.Open()
+            Dim mySqlCommand2 As New System.Data.SqlClient.SqlCommand(Consulta, mySqlConnection2)
+            Dim myDataReader2 As Data.SqlClient.SqlDataReader
+            myDataReader2 = mySqlCommand2.ExecuteReader()
 
-        For Each row As DataRow In Tablita.Rows
-            CodigoDeRastreo = row(2).ToString
+            Do While myDataReader2.Read()
+                If myDataReader2.IsDBNull(0) = False Then
+                    CodigoDeRastreo = myDataReader2.GetString(2)
+                Else
+                    CodigoDeRastreo = ""
+                End If
 
-            'verifica que el tracking no exista en la tabla paquete
-            Consulta = "Select Count(*) from Paquete where CodigoDeRastreo like '%" & CodigoDeRastreo & "%'"
-            If mostrar.retornarentero(Consulta, MyConString) <> 0 Then
-                'verifica si existe registros en la tabla pedido con el código de rastreo y sin número de paquete (sin guía)
+                'verifica que el tracking no exista en la tabla paquete
+                Consulta = "Select Count(*) from Paquete where CodigoDeRastreo like '%" & CodigoDeRastreo & "%'"
+                If mostrar.retornarentero(Consulta, MyConString) = 0 Then
 
-                Consulta = "select COUNT(*) from Pedido where CodigoDeRastreo like '%" & CodigoDeRastreo & "%' and CodigoPaquete is null"
-                If mostrar.retornarentero(Consulta, MyConString) = 0 Then Return
+                    'verifica si el tracking existe en tabla pedido
+                    Consulta = "select Count(*) from Pedido where CodigoDeRastreo like '%" & CodigoDeRastreo & "%'"
+                    If mostrar.retornarentero(Consulta, MyConString) > 0 Then
+                        'Consulta = "select case when CHARINDEX('(', CodigoDeRastreo) > 0 and CHARINDEX(')', CodigoDeRastreo) > 0 then SUBSTRING(CodigoDeRastreo,CHARINDEX('(', CodigoDeRastreo) + 1, CHARINDEX(')', CodigoDeRastreo) - CHARINDEX('(', CodigoDeRastreo) - 1) else CodigoDeRastreo end as CodigoDeRastreo" & _
+                        '"from Pedido where CodigoDeRastreo like '%" & Request.QueryString("Tracking") & "'"
+                        'CodigoDeRastreo = mostrar2.retornarcadena(Consulta, MyconString)
 
-                'agrega el código de paquete al registro de pedido
-
-                Consulta = "Select CodigoPaquete from Paquete where CodigoDeRastreo like '%" & CodigoDeRastreo & "%'"
-                    CodigoPaquete = mostrar.retornarentero(Consulta, MyConString)
-
-                    Consulta = "update Pedido set CodigoPaquete = " & CStr(CodigoPaquete) & " where CodigoDeRastreo in ( " &
-                                        "select top(1) CodigoDeRastreo from Pedido where CodigoDeRastreo = '" & CodigoDeRastreo & "' or CodigoDeRastreo like '%" & CodigoDeRastreo & "%' " &
-                                    ")"
-
-                mostrar.insertarmodificareliminar(Consulta, MyConString)
-
-                Return
-            End If
-
-            'verifica si el tracking existe en tabla pedido
-            Consulta = "select Count(*) from Pedido where CodigoDeRastreo like '%" & CodigoDeRastreo & "%'"
-            If mostrar.retornarentero(Consulta, MyConString) = 0 Then Return
-
-            'obtiene los datos que se guardarán en la tabla paquete
-            Consulta = "select top(1) CONVERT(date,FechaDeOrden)  " &
+                        'obtiene los datos que se guardarán en la tabla paquete
+                        Consulta = "select top(1) CONVERT(date,FechaDeOrden)  " &
                         "from Pedido where CodigoDeRastreo like '%" & CodigoDeRastreo & "%'"
-            CadFechaOrden = mostrar.retornafechaSinHora(Consulta, MyConString)
-            CadFechaOrden = CadFechaOrden.Substring(6, 4) & "-" & CadFechaOrden.Substring(3, 2) & "-" & CadFechaOrden.Substring(0, 2)
+                        CadFechaOrden = mostrar.retornafechaSinHora(Consulta, MyConString)
+                        CadFechaOrden = CadFechaOrden.Substring(6, 4) & "-" & CadFechaOrden.Substring(3, 2) & "-" & CadFechaOrden.Substring(0, 2)
 
-            Consulta = "DECLARE @valores VARCHAR(1000) " &
+                        Consulta = "DECLARE @valores VARCHAR(1000) " &
                             "select @valores= COALESCE(@valores + ', ', '') + t.TipoDeProducto from ( " &
                             "select distinct(isnull(TipoDeProducto,'')) as TipoDeProducto from Pedido where CodigoDeRastreo like '%" & CodigoDeRastreo & "%' " &
                             ") t " &
                             "select replace(@valores,',',' ') "
 
-            Descripcion = mostrar.retornarcadena(Consulta, MyConString)
+                        Descripcion = mostrar.retornarcadena(Consulta, MyConString)
 
-            Consulta = "select top(1) isnull(Vendedor,'') from Pedido where CodigoDeRastreo like '%" & CodigoDeRastreo & "%'"
-            EnviadoPor = mostrar.retornarcadena(Consulta, MyConString)
+                        Consulta = "select top(1) isnull(Vendedor,'') from Pedido where CodigoDeRastreo like '%" & CodigoDeRastreo & "%'"
+                        EnviadoPor = mostrar.retornarcadena(Consulta, MyConString)
 
-            'verifica si hay productos sin peso
-            'si hay algún producto sin peso (NULL), Peso = 0
-            'si todos los productos tienen peso, se suman todos
-            Consulta = "select COUNT(*) from Producto where CodigoAmazon in ( " &
+                        'verifica si hay productos sin peso
+                        'si hay algún producto sin peso (NULL), Peso = 0
+                        'si todos los productos tienen peso, se suman todos
+                        Consulta = "select COUNT(*) from Producto where CodigoAmazon in ( " &
                                     "select CodigoAmazon from Pedido where CodigoDeRastreo like '%" & CodigoDeRastreo & "%' " &
                                     ") and Peso is null "
 
-            If mostrar.retornarentero(Consulta, MyConString) = 0 Then
-                Consulta = "select sum(isnull(Peso,0)) from Producto where CodigoAmazon in ( " &
+                        If mostrar.retornarentero(Consulta, MyConString) = 0 Then
+                            Consulta = "select sum(isnull(Peso,0)) from Producto where CodigoAmazon in ( " &
                                     "select CodigoAmazon from Pedido where CodigoDeRastreo like '%" & CodigoDeRastreo & "%' " &
                                     ")"
-                Peso = mostrar.retornardecimal(Consulta, MyConString)
-            Else
-                Peso = 0
-            End If
 
-            Consulta = "select sum(isnull(Impuesto,0)) from Pedido where CodigoDeRastreo like '%" & CodigoDeRastreo & "%'"
-            Impuesto = mostrar.retornardecimal(Consulta, MyConString)
+                            Peso = mostrar.retornardecimal(Consulta, MyConString)
 
-            CadPeso = ""
-            If Peso <> 0 Then
-                CadPeso = CStr(Peso)
-            End If
+                        Else
+                            Peso = 0
+                        End If
 
-            CadImpuesto = ""
+                        Consulta = "select sum(isnull(Impuesto,0)) from Pedido where CodigoDeRastreo like '%" & CodigoDeRastreo & "%'"
+                        Impuesto = mostrar.retornardecimal(Consulta, MyConString)
 
-            Guia = Obtener_Nueva_Guia()
+                        CadPeso = ""
+                        If Peso <> 0 Then
+                            CadPeso = CStr(Peso)
+                        End If
 
-            CodigoEstablecimiento = ""
-            Consulta = "select top(1) pr.CodigoEstablecimiento " &
+                        CadImpuesto = ""
+                        'If Impuesto <> 0 Then
+                        '    CadImpuesto = CStr(CadImpuesto)
+                        'End If
+
+                        'Consulta = "select top(1) GuiaAerea from Paquete where  Fecha <= '" & CadFechaOrden & "' and GuiaAerea is not null order by Fecha desc, GuiaAerea desc"
+                        'Guia = mostrar.retornarcadena(Consulta, MyConString)
+                        Guia = Obtener_Nueva_Guia()
+
+                        CodigoEstablecimiento = ""
+                        Consulta = "select top(1) pr.CodigoEstablecimiento " &
                         "from Pedido pe, Producto pr where pe.CodigoAmazon = pr.CodigoAmazon and pe.OrdenDeAmazon = '" & OrdenDeAmazon & "' and CodigoDeRastreo is not null "
-            Tablita.Clear()
-            mostrar.ejecuta_query_dt(Consulta, Tablita, MyConString)
 
-            CodigoEstablecimiento = Tablita.Rows(0)("CodigoEstablecimiento").ToString
+                        Using mySqlConnection As New System.Data.SqlClient.SqlConnection(MyConString)
+                            mySqlConnection.Open()
+                            Dim mySqlCommand As New System.Data.SqlClient.SqlCommand(Consulta, mySqlConnection)
+                            Dim myDataReader As Data.SqlClient.SqlDataReader
+                            myDataReader = mySqlCommand.ExecuteReader()
 
-            Contador = 0
-            Exito = False
+                            Do While myDataReader.Read()
+                                If myDataReader.IsDBNull(0) = False Then
+                                    CodigoEstablecimiento = CStr(myDataReader.GetInt32(0))
+                                End If
 
-            Insertar_Paquete(CodigoDeRastreo, Guia, EnviadoPor, Descripcion, CadPeso, "", CadImpuesto, "1", "1", CodigoEstablecimiento, CodigoPaquete)
-            Actualizar_Estado_Paquete_Venta(CodigoPaquete, CodigoDeRastreo, True)
-        Next row
+                            Loop
+
+                            myDataReader.Close()
+                            mySqlConnection.Close()
+                        End Using
+
+
+                        Contador = 0
+                        Exito = False
+                        'While Not Exito
+                        '    Guia = CStr(CInt(Guia) - 1)
+                        '    Consulta = "Select count(*) from Paquete Where GuiaAerea = '" & Guia & "'"
+                        '    If mostrar.retornarentero(Consulta, MyConString) = 0 Then
+                        '        Exito = True
+                        '    Else
+                        '        Contador = Contador + 1
+                        '    End If
+                        'End While
+
+                        'If Exito = True Then
+                        Insertar_Paquete(CodigoDeRastreo, Guia, EnviadoPor, Descripcion, CadPeso, "", CadImpuesto, "1", "1", CodigoEstablecimiento, CodigoPaquete)
+                        Actualizar_Estado_Paquete_Venta(CodigoPaquete, CodigoDeRastreo, True)
+                        'End If
+                    End If
+
+                Else 'ya existe el paquete
+                    'verifica si existe registros en la tabla pedido con el código de rastreo y sin número de paquete (sin guía)
+
+                    Consulta = "select COUNT(*) from Pedido where CodigoDeRastreo like '%" & CodigoDeRastreo & "%' and CodigoPaquete is null"
+                    If mostrar.retornarentero(Consulta, MyConString) > 0 Then
+                        'agrega el código de paquete al registro de pedido
+
+                        Consulta = "Select CodigoPaquete from Paquete where CodigoDeRastreo like '%" & CodigoDeRastreo & "%'"
+                        CodigoPaquete = mostrar.retornarentero(Consulta, MyConString)
+
+                        Consulta = "update Pedido set CodigoPaquete = " & CStr(CodigoPaquete) & " where CodigoDeRastreo in ( " &
+                                        "select top(1) CodigoDeRastreo from Pedido where CodigoDeRastreo = '" & CodigoDeRastreo & "' or CodigoDeRastreo like '%" & CodigoDeRastreo & "%' " &
+                                    ")"
+
+                        mostrar.insertarmodificareliminar(Consulta, MyConString)
+
+                    End If
+
+                End If
+
+            Loop
+
+            myDataReader2.Close()
+            mySqlConnection2.Close()
+        End Using
+
     End Sub
 
     'obtiene el valor para una guía generada por el sistema para un paquete que no tiene guía
@@ -559,7 +655,7 @@ Module Module1
         End If
 
 
-        Return "G" & Guia
+        Obtener_Nueva_Guia = "G" & Guia
     End Function
 
 
