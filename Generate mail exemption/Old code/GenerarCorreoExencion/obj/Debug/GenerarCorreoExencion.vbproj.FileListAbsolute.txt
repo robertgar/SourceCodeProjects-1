@@ -1,0 +1,4 @@
+C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\Old code\GenerarCorreoExencion\obj\Debug\GenerarCorreoExencion.vbproj.AssemblyReference.cache
+C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\Old code\GenerarCorreoExencion\obj\Debug\GenerarCorreoExencion.Resources.resources
+C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\Old code\GenerarCorreoExencion\obj\Debug\GenerarCorreoExencion.vbproj.GenerateResource.cache
+C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\Old code\GenerarCorreoExencion\obj\Debug\GenerarCorreoExencion.vbproj.CoreCompileInputs.cache
