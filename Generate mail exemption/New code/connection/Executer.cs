@@ -11,6 +11,11 @@ namespace connection{
     public class Execute{
         private SqlConnection connector = new ConnectToSQL().getStringConnection();
         private DataTable Buffer = new DataTable();
+        private Boolean isSimulation;
+
+        public void setSimulation(Boolean deAMentis) {
+            this.isSimulation = deAMentis;
+        }
 
         public String getValue(ref StringBuilder query, String Error = ""){
             fillTable(ref query, ref Buffer);
@@ -45,7 +50,12 @@ namespace connection{
             }
         }
 
-        public void executeQuery(ref StringBuilder query) {
+        public void executeQuery(ref StringBuilder query, [Optional] String msg) {
+            if (isSimulation) {
+                Console.WriteLine(msg);
+                return;
+            }
+
             try {
                 connector.Open();
                 SqlCommand command = new SqlCommand(query.ToString(), connector);

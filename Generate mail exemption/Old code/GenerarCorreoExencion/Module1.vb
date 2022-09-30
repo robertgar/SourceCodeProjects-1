@@ -1,6 +1,7 @@
 ﻿Imports System
 Imports System.Net
 Imports System.Web
+Imports System.Text
 
 Module Module1
 
@@ -9,6 +10,7 @@ Module Module1
     Dim MyConString As String
     Dim Consulta As String
     Dim Tablita As New DataTable
+    Dim query As New StringBuilder
 
     Sub Main()
         MyConString = mostrar.Obtener_Cadena_Conexion
@@ -35,29 +37,42 @@ Module Module1
         OrdenDeAmazon = ""
         CanalMostrarAlerta = ""
 
-        Consulta = "select Valor from Parametro where CodigoParametro = 4" 'correo nivel 1
-        CorreoAdministracion1 = mostrar.retornarcadena(Consulta, MyConString)
+        CorreoAdministracion1 = mostrar.Obtener_Parametros("4", MyConString)
 
         Try
             CanalMostrarAlerta = ""
-            Consulta = "select w.Url, isnull(Activo,0) as Activo from Alerta a, Webhook w " &
-                    "where a.CodigoWebhook = w.CodigoWebhook " &
-                    "and a.CodigoAlerta = 11"
+            query.Clear()
+            query.AppendLine(" SELECT")
+            query.AppendLine("   w.Url,")
+            query.AppendLine("   ISNULL(Activo, 0) Activo")
+            query.AppendLine(" FROM")
+            query.AppendLine("   Alerta a,")
+            query.AppendLine("   Webhook w")
+            query.AppendLine(" WHERE")
+            query.AppendLine("   a.CodigoWebhook = w.CodigoWebhook")
+            query.AppendLine("   AND a.CodigoAlerta = 11")
+
             Tablita.Clear()
-            mostrar.ejecuta_query_dt(Consulta, Tablita, MyConString)
+            mostrar.ejecuta_query_dt(query.ToString, Tablita, MyConString)
 
             For Each row As DataRow In Tablita.Rows
-                Dim Activo As Boolean = CBool(row("Activo").ToString)
-                If Activo = True Then
-                    If row("Url").ToString <> "" Then
-                        CanalMostrarAlerta = row("Url").ToString
-                    End If
-                End If
+                If Not CBool(row("Activo").ToString) Then Continue For
+
+                If row("Url").ToString.Equals("") Then Continue For
+
+                CanalMostrarAlerta = row("Url").ToString
             Next
 
             Tablita.Clear()
-            Consulta = "select OrdenDeAmazon from OrdenDeCompra where CorreoDeExencion is null"
-            mostrar.ejecuta_query_dt(Consulta, Tablita, MyConString)
+            query.Clear()
+            query.AppendLine(" SELECT")
+            query.AppendLine("   OrdenDeAmazon")
+            query.AppendLine(" FROM")
+            query.AppendLine("   OrdenDeCompra")
+            query.AppendLine(" WHERE")
+            query.AppendLine("   CorreoDeExencion IS NULL")
+
+            mostrar.ejecuta_query_dt(query.ToString, Tablita, MyConString)
 
             For Each Row As DataRow In Tablita.Rows
                 OrdenDeAmazon = Row("OrdenDeAmazon").ToString
@@ -71,29 +86,69 @@ Module Module1
                 Mensaje = ""
 
                 'verifica si hay líneas de pedido en solicitado, tránsito o pendiente, si hay no genera guía ni envía el correo
-                Consulta = "select COUNT(1) from Pedido where OrdenDeAmazon = '" & OrdenDeAmazon & "' and CodigoEstadoPedido in (1,2,6) and Cantidad > 0"
-                NumSolicitadoTransito = mostrar.retornarentero(Consulta, MyConString)
+                query.Clear()
+                query.AppendLine(" SELECT")
+                query.AppendLine("   COUNT(1)")
+                query.AppendLine(" FROM")
+                query.AppendLine("   Pedido")
+                query.AppendLine(" WHERE")
+                query.Append("   OrdenDeAmazon = '").Append(OrdenDeAmazon).Append("'")
+                query.AppendLine("   AND CodigoEstadoPedido IN (1, 2, 6)")
+                query.AppendLine("   AND Cantidad > 0")
+
+                NumSolicitadoTransito = mostrar.retornarentero(query.ToString, MyConString)
 
                 If NumSolicitadoTransito <> 0 Then Continue For
 
                 'obtiene el impuesto a pagar de la órden de amazon
-                Consulta = "select isnull(SUM(Impuesto),0) as Impuesto from Pedido  where OrdenDeAmazon = '" & OrdenDeAmazon & "' and CodigoDeRastreo is not null "
-                TotalImpuesto = mostrar.retornardecimal(Consulta, MyConString)
+                query.Clear()
+                query.AppendLine(" SELECT")
+                query.AppendLine("   ISNULL(SUM(Impuesto), 0) Impuesto")
+                query.AppendLine(" FROM")
+                query.AppendLine("   Pedido")
+                query.AppendLine(" WHERE")
+                query.Append("   OrdenDeAmazon = '").Append(OrdenDeAmazon).Append("'")
+                query.AppendLine("   AND CodigoDeRastreo IS NOT NULL")
 
-                Consulta = "select COUNT(1) from Pedido where OrdenDeAmazon = '" & OrdenDeAmazon & "' and Cantidad > 0 and CodigoEstadoPedido <> 4 "
-                NumSinCancelar = mostrar.retornarentero(Consulta, MyConString)
+                TotalImpuesto = mostrar.retornardecimal(query.ToString, MyConString)
+
+                query.Clear()
+                query.AppendLine(" SELECT")
+                query.AppendLine("   COUNT(1)")
+                query.AppendLine(" FROM")
+                query.AppendLine("   Pedido")
+                query.AppendLine(" WHERE")
+                query.Append("   OrdenDeAmazon = '").Append(OrdenDeAmazon).Append("'")
+                query.AppendLine("   AND Cantidad > 0")
+                query.AppendLine("   AND CodigoEstadoPedido <> 4")
+
+                NumSinCancelar = mostrar.retornarentero(query.ToString, MyConString)
 
                 'si el correo tiene SiempreEnviarExencion = 1, aunque totalimpuesto = 0 se envía el correo
-                Consulta = "select COUNT(1) from CuentaDeCompra where Correo in ( " &
-                                    "select distinct Correo from Pedido where OrdenDeAmazon = '" & OrdenDeAmazon & "' and Correo is not null " &
-                                   ") and SiempreEnviarExencion = 1 "
+                Consulta = "select COUNT(1) from CuentaDeCompra where Correo in ( select distinct Correo from Pedido where OrdenDeAmazon = '" & OrdenDeAmazon & "' and Correo is not null ) and SiempreEnviarExencion = 1 "
+                query.Clear()
+                query.AppendLine(" SELECT")
+                query.AppendLine("   COUNT(1)")
+                query.AppendLine(" FROM")
+                query.AppendLine("   CuentaDeCompra")
+                query.AppendLine(" WHERE")
+                query.AppendLine("   Correo IN (")
+                query.AppendLine("     SELECT")
+                query.AppendLine("       DISTINCT Correo")
+                query.AppendLine("     FROM")
+                query.AppendLine("       Pedido")
+                query.AppendLine("     WHERE")
+                query.Append("       OrdenDeAmazon = '").Append(OrdenDeAmazon).Append("'")
+                query.AppendLine("       AND Correo IS NOT NULL")
+                query.AppendLine("   )")
+                query.AppendLine("   AND SiempreEnviarExencion = 1")
 
                 'si el correo tiene NuncaEnviarExencion = 1, aunque totalimpuesto > 0 no se envía el correo
                 Consulta2 = "select COUNT(1) from CuentaDeCompra where Correo in ( " &
                                     "select distinct Correo from Pedido where OrdenDeAmazon = '" & OrdenDeAmazon & "' and Correo is not null " &
                                     ") and NuncaEnviarExencion = 1 "
 
-                If Not (((TotalImpuesto > 0 Or mostrar.retornarentero(Consulta, MyConString) > 0)) And mostrar.retornarentero(Consulta2, MyConString) = 0 And NumSinCancelar > 0) Then Continue For
+                If Not (((TotalImpuesto > 0 Or mostrar.retornarentero(query.ToString, MyConString) > 0)) And mostrar.retornarentero(Consulta2, MyConString) = 0 And NumSinCancelar > 0) Then Continue For
 
                 Generar_Guias(OrdenDeAmazon)
 
@@ -105,9 +160,19 @@ Module Module1
 
                 For i As Integer = 0 To texto.Length - 1
                     'verifica si hay alguna línea en el tracking que no haya sido cancelada y tengan cantidad, si todas las líneas del tracking están canceladas no genera el pdf de ese tracking
-                    Consulta = "select COUNT(1) from Pedido pe, Paquete pa where pe.CodigoPaquete = pa.CodigoPaquete and GuiaAerea = '" & texto(i) & "' and Cantidad > 0 and CodigoEstadoPedido <> 4 "
+                    query.Clear()
+                    query.AppendLine(" SELECT")
+                    query.AppendLine("   COUNT(1)")
+                    query.AppendLine(" FROM")
+                    query.AppendLine("   Pedido pe,")
+                    query.AppendLine("   Paquete pa")
+                    query.AppendLine(" WHERE")
+                    query.AppendLine("   pe.CodigoPaquete = pa.CodigoPaquete")
+                    query.AppendLine("   AND GuiaAerea = '" & texto(i) & "'")
+                    query.AppendLine("   AND Cantidad > 0")
+                    query.AppendLine("   AND CodigoEstadoPedido <> 4")
 
-                    If mostrar.retornarentero(Consulta, MyConString) = 0 Then Continue For 'genera el pdf
+                    If mostrar.retornarentero(query.ToString, MyConString) = 0 Then Continue For 'genera el pdf
 
                     If Exito = False Then Continue For
 
@@ -137,13 +202,32 @@ Module Module1
                     Return
                 End If
 
-                Consulta = "select count(1) from Pedido where OrdenDeAmazon = '" & OrdenDeAmazon & "' and Correo is not null"
-                If mostrar.retornarentero(Consulta, MyConString) = 0 Then Continue For
+                query.Clear()
+                query.AppendLine(" SELECT")
+                query.AppendLine("   COUNT(1)")
+                query.AppendLine(" FROM")
+                query.AppendLine("   Pedido")
+                query.AppendLine(" WHERE")
+                query.AppendLine("   OrdenDeAmazon = '" & OrdenDeAmazon & "'")
+                query.AppendLine("   AND Correo IS NOT NULL")
+
+                If mostrar.retornarentero(query.ToString, MyConString) = 0 Then Continue For
 
                 Correo = ""
-                Consulta = "select top(1) isnull(pe.Correo,'') as Correo, isnull(cc.EnviarCopiaExencion,0) as EnviarCopiaExencion from Pedido pe, CuentaDeCompra cc where pe.Correo = cc.Correo and OrdenDeAmazon = '" & OrdenDeAmazon & "' and pe.Correo is not null"
+                query.Clear()
+                query.AppendLine(" SELECT")
+                query.AppendLine("   TOP(1) ISNULL(pe.Correo, '') Correo,")
+                query.AppendLine("   ISNULL(cc.EnviarCopiaExencion, 0) EnviarCopiaExencion")
+                query.AppendLine(" FROM")
+                query.AppendLine("   Pedido pe,")
+                query.AppendLine("   CuentaDeCompra cc")
+                query.AppendLine(" WHERE")
+                query.AppendLine("   pe.Correo = cc.Correo")
+                query.AppendLine("   AND OrdenDeAmazon = '" & OrdenDeAmazon & "'")
+                query.AppendLine("   AND pe.Correo IS NOT NULL")
+
                 Tablita.Clear()
-                mostrar.ejecuta_query_dt(Consulta, Tablita, MyConString)
+                mostrar.ejecuta_query_dt(query.ToString, Tablita, MyConString)
 
                 For Each rowcita As DataRow In Tablita.Rows
                     Correo = rowcita("Correo").ToString
@@ -249,9 +333,17 @@ Module Module1
         ' busca las ordenes que no tengan líneas de pedido con tracking nulo 
 
         'verifica que haya algún producto recibido en la orden
-        Consulta = "select COUNT(1) from Pedido where OrdenDeAmazon = '" & OrdenDeAmazon & "' and CodigoEstadoPedido = 3 and Cantidad > 0"
+        query.Clear()
+        query.AppendLine(" SELECT")
+        query.AppendLine("   COUNT(1)")
+        query.AppendLine(" FROM")
+        query.AppendLine("   Pedido")
+        query.AppendLine(" WHERE")
+        query.AppendLine("   OrdenDeAmazon = '" & OrdenDeAmazon & "'")
+        query.AppendLine("   AND CodigoEstadoPedido = 3")
+        query.AppendLine("   AND Cantidad > 0")
 
-        If mostrar.retornarentero(Consulta, MyConString) > 0 Then 'la orden tienen algún producto recibido
+        If mostrar.retornarentero(query.ToString, MyConString) > 0 Then 'la orden tienen algún producto recibido
             Generar_Guia_Insertar_Paquetes(OrdenDeAmazon)
         End If
     End Sub
@@ -269,15 +361,37 @@ Module Module1
         Dim GuiaAerea As String
 
         'número de líneas de la orden que no tienen tracking (codigoderastreo = null)
-        Consulta = "select COUNT(1) from Pedido where OrdenDeAmazon = '" & OrdenDeAmazon & "' and (CodigoDeRastreo is null or LEN(codigoderastreo) = 0)"
-        TrackingNulo = mostrar.retornarentero(Consulta, MyConString)
+        query.Clear()
+        query.AppendLine(" SELECT")
+        query.AppendLine("   COUNT(1)")
+        query.AppendLine(" FROM")
+        query.AppendLine("   Pedido")
+        query.AppendLine(" WHERE")
+        query.AppendLine("   OrdenDeAmazon = '" & OrdenDeAmazon & "'")
+        query.AppendLine("   AND (")
+        query.AppendLine("     CodigoDeRastreo IS NULL")
+        query.AppendLine("     OR LEN(codigoderastreo) = 0")
+        query.AppendLine("   )")
+
+        TrackingNulo = mostrar.retornarentero(query.ToString, MyConString)
 
         'total de tracking de la orden
-        Consulta = "select COUNT(1) from ( " &
-            "select distinct CodigoDeRastreo from Pedido where OrdenDeAmazon = '" & OrdenDeAmazon & "' and CodigoDeRastreo is not null and CodigoEstadoPedido <> 4 " &
-            ") z "
+        query.Clear()
+        query.AppendLine(" SELECT")
+        query.AppendLine("   COUNT(1)")
+        query.AppendLine(" FROM")
+        query.AppendLine(" (")
+        query.AppendLine("   SELECT")
+        query.AppendLine("     DISTINCT CodigoDeRastreo")
+        query.AppendLine("   FROM")
+        query.AppendLine("     Pedido")
+        query.AppendLine("   WHERE")
+        query.AppendLine("     OrdenDeAmazon = '" & OrdenDeAmazon & "'")
+        query.AppendLine("     AND CodigoDeRastreo IS NOT NULL")
+        query.AppendLine("     AND CodigoEstadoPedido <> 4")
+        query.AppendLine(" ) z")
 
-        TotalPedido = mostrar.retornarentero(Consulta, MyConString)
+        TotalPedido = mostrar.retornarentero(query.ToString, MyConString)
         TotalPaquete = 0
         Exito = False
         ListaGuias = ""
@@ -286,8 +400,31 @@ Module Module1
         If TotalPedido = 0 Then Return Exito
 
         Tablita.Clear()
-        Consulta = "select CodigoDeRastreo, case when CHARINDEX('(', CodigoDeRastreo) > 0 and CHARINDEX(')', CodigoDeRastreo) > 0 then SUBSTRING(CodigoDeRastreo,CHARINDEX('(', CodigoDeRastreo) + 1, CHARINDEX(')', CodigoDeRastreo) - CHARINDEX('(', CodigoDeRastreo) - 1) else CodigoDeRastreo end as Tracking, isnull(SUM(Impuesto),0) as Impuesto from Pedido  where OrdenDeAmazon = '" & OrdenDeAmazon & "' and CodigoEstadoPedido <> 4 group by CodigoDeRastreo having CodigoDeRastreo is not null "
-        mostrar.ejecuta_query_dt(Consulta, Tablita, MyConString)
+        query.Clear()
+        query.AppendLine(" SELECT")
+        query.AppendLine("   CodigoDeRastreo,")
+        query.AppendLine("   CASE")
+        query.AppendLine("     WHEN CHARINDEX('(', CodigoDeRastreo) > 0")
+        query.AppendLine("     AND CHARINDEX(')', CodigoDeRastreo) > 0")
+        query.AppendLine("     THEN SUBSTRING(")
+        query.AppendLine("       CodigoDeRastreo,")
+        query.AppendLine("       CHARINDEX('(', CodigoDeRastreo) + 1,")
+        query.AppendLine("       CHARINDEX(')', CodigoDeRastreo) - CHARINDEX('(', CodigoDeRastreo) - 1")
+        query.AppendLine("     )")
+        query.AppendLine("     ELSE CodigoDeRastreo")
+        query.AppendLine("   END Tracking,")
+        query.AppendLine("   ISNULL(SUM(Impuesto), 0) Impuesto")
+        query.AppendLine(" FROM")
+        query.AppendLine("   Pedido")
+        query.AppendLine(" WHERE")
+        query.AppendLine("   OrdenDeAmazon = '" & OrdenDeAmazon & "'")
+        query.AppendLine("   AND CodigoEstadoPedido <> 4")
+        query.AppendLine(" GROUP BY")
+        query.AppendLine("   CodigoDeRastreo")
+        query.AppendLine(" HAVING")
+        query.AppendLine("   CodigoDeRastreo IS NOT NULL")
+
+        mostrar.ejecuta_query_dt(query.ToString, Tablita, MyConString)
 
         For Each row As DataRow In Tablita.Rows
             If Not row("Impuesto").ToString.Equals("") Then
@@ -342,12 +479,37 @@ Module Module1
         Dim CodigoEstablecimiento As String
 
         'me devuelve el tracking sin la empresa de entrega, para UPS(1Z1020) devuelve 1Z1020
-        Consulta = "select distinct pe.CodigoDeRastreo, (select count(1) from Pedido where CodigoEstadoPedido = 3 and CodigoDeRastreo = pe.CodigoDeRastreo) as Recibidos, " &
-             "case when CHARINDEX('(', pe.CodigoDeRastreo) > 0 and CHARINDEX(')', pe.CodigoDeRastreo) > 0 then SUBSTRING(pe.CodigoDeRastreo,CHARINDEX('(', pe.CodigoDeRastreo) + 1, CHARINDEX(')', pe.CodigoDeRastreo) - CHARINDEX('(', pe.CodigoDeRastreo) - 1) else pe.CodigoDeRastreo end as TrackingCorto " &
-             "from Pedido pe where pe.OrdenDeAmazon = '" & OrdenDeAmazon & "' and CodigoDeRastreo is not null and CodigoEstadoPedido <> 4 "
+        query.Clear()
+        query.AppendLine(" SELECT")
+        query.AppendLine("   DISTINCT pe.CodigoDeRastreo,")
+        query.AppendLine("   (")
+        query.AppendLine("     SELECT")
+        query.AppendLine("       COUNT(1)")
+        query.AppendLine("     FROM")
+        query.AppendLine("       Pedido")
+        query.AppendLine("     WHERE")
+        query.AppendLine("       CodigoEstadoPedido = 3")
+        query.AppendLine("       AND CodigoDeRastreo = pe.CodigoDeRastreo")
+        query.AppendLine("   ) Recibidos,")
+        query.AppendLine("   CASE")
+        query.AppendLine("     WHEN CHARINDEX('(', pe.CodigoDeRastreo) > 0")
+        query.AppendLine("     AND CHARINDEX(')', pe.CodigoDeRastreo) > 0")
+        query.AppendLine("     THEN SUBSTRING(")
+        query.AppendLine("       pe.CodigoDeRastreo,")
+        query.AppendLine("       CHARINDEX('(', pe.CodigoDeRastreo) + 1,")
+        query.AppendLine("       CHARINDEX(')', pe.CodigoDeRastreo) - CHARINDEX('(', pe.CodigoDeRastreo) - 1")
+        query.AppendLine("     )")
+        query.AppendLine("     ELSE pe.CodigoDeRastreo")
+        query.AppendLine("   END TrackingCorto")
+        query.AppendLine(" FROM")
+        query.AppendLine("   Pedido pe")
+        query.AppendLine(" WHERE")
+        query.AppendLine("   pe.OrdenDeAmazon = '" & OrdenDeAmazon & "'")
+        query.AppendLine("   AND CodigoDeRastreo IS NOT NULL")
+        query.AppendLine("   AND CodigoEstadoPedido <> 4")
 
         Tablita.Clear()
-        mostrar.ejecuta_query_dt(Consulta, Tablita, MyConString)
+        mostrar.ejecuta_query_dt(query.ToString, Tablita, MyConString)
 
         For Each row As DataRow In Tablita.Rows
             If Not row("CodigoDeRastreo").ToString.Equals("") Then
@@ -358,21 +520,34 @@ Module Module1
 
             'verifica que el tracking no exista en la tabla paquete
             Consulta = "Select count(1) from Paquete where CodigoDeRastreo like '%" & CodigoDeRastreo & "%'"
-            If mostrar.retornarentero(Consulta, MyConString) = 0 Then
+            If mostrar.retornarentero(Consulta, MyConString) <> 0 Then
                 'verifica si existe registros en la tabla pedido con el código de rastreo y sin número de paquete (sin guía)
 
                 Consulta = "select count(1) from Pedido where CodigoDeRastreo like '%" & CodigoDeRastreo & "%' and CodigoPaquete is null"
-                If mostrar.retornarentero(Consulta, MyConString) = 0 Then
-                    'agrega el código de paquete al registro de pedido
+                If mostrar.retornarentero(Consulta, MyConString) = 0 Then Return
 
-                    Consulta = "Select CodigoPaquete from Paquete where CodigoDeRastreo like '%" & CodigoDeRastreo & "%'"
-                    CodigoPaquete = mostrar.retornarentero(Consulta, MyConString)
+                'agrega el código de paquete al registro de pedido
 
-                    Consulta = "update Pedido set CodigoPaquete = " & CStr(CodigoPaquete) & " where CodigoDeRastreo in ( " &
-                                    "select top(1) CodigoDeRastreo from Pedido where CodigoDeRastreo = '" & CodigoDeRastreo & "' or CodigoDeRastreo like '%" & CodigoDeRastreo & "%' )"
+                Consulta = "Select CodigoPaquete from Paquete where CodigoDeRastreo like '%" & CodigoDeRastreo & "%'"
+                CodigoPaquete = mostrar.retornarentero(Consulta, MyConString)
 
-                    mostrar.insertarmodificareliminar(Consulta, MyConString)
-                End If
+                query.Clear()
+                query.AppendLine(" UPDATE")
+                query.AppendLine("   Pedido")
+                query.AppendLine(" SET")
+                query.AppendLine("   CodigoPaquete = " & CStr(CodigoPaquete) & "")
+                query.AppendLine(" WHERE")
+                query.AppendLine("   CodigoDeRastreo IN (")
+                query.AppendLine("     SELECT")
+                query.AppendLine("       TOP(1) CodigoDeRastreo")
+                query.AppendLine("     FROM")
+                query.AppendLine("       Pedido")
+                query.AppendLine("     WHERE")
+                query.AppendLine("       CodigoDeRastreo = '" & CodigoDeRastreo & "'")
+                query.AppendLine("       OR CodigoDeRastreo LIKE '%" & CodigoDeRastreo & "%'")
+                query.AppendLine("   )")
+
+                mostrar.insertarmodificareliminar(query.ToString, MyConString)
 
                 Return
             End If
@@ -387,10 +562,7 @@ Module Module1
             CadFechaOrden = mostrar.retornafechaSinHora(Consulta, MyConString)
             CadFechaOrden = CadFechaOrden.Substring(6, 4) & "-" & CadFechaOrden.Substring(3, 2) & "-" & CadFechaOrden.Substring(0, 2)
 
-            Consulta = "DECLARE @valores VARCHAR(1000) " &
-                        "select @valores= COALESCE(@valores + ', ', '') + t.TipoDeProducto from ( " &
-                        "select distinct(isnull(TipoDeProducto,'')) as TipoDeProducto from Pedido where CodigoDeRastreo like '%" & CodigoDeRastreo & "%' " &
-                        ") t select replace(@valores,',',' ') "
+            Consulta = "DECLARE @valores VARCHAR(1000) select @valores= COALESCE(@valores + ', ', '') + t.TipoDeProducto from ( select distinct(isnull(TipoDeProducto,'')) as TipoDeProducto from Pedido where CodigoDeRastreo like '%" & CodigoDeRastreo & "%' ) t select replace(@valores,',',' ') "
 
             Descripcion = mostrar.retornarcadena(Consulta, MyConString)
 
@@ -405,9 +577,7 @@ Module Module1
                                 ") and Peso is null "
 
             If mostrar.retornarentero(Consulta, MyConString) = 0 Then
-
-                Consulta = "select sum(isnull(Peso,0)) from Producto where CodigoAmazon in ( " &
-                                "select CodigoAmazon from Pedido where CodigoDeRastreo like '%" & CodigoDeRastreo & "%' )"
+                Consulta = "select sum(isnull(Peso,0)) from Producto where CodigoAmazon in ( select CodigoAmazon from Pedido where CodigoDeRastreo like '%" & CodigoDeRastreo & "%' )"
 
                 Peso = mostrar.retornardecimal(Consulta, MyConString)
             Else
@@ -427,8 +597,7 @@ Module Module1
             Guia = Obtener_Nueva_Guia()
 
             CodigoEstablecimiento = ""
-            Consulta = "select top(1) pr.CodigoEstablecimiento " &
-                   "from Pedido pe, Producto pr where pe.CodigoAmazon = pr.CodigoAmazon and pe.OrdenDeAmazon = '" & OrdenDeAmazon & "' and CodigoDeRastreo is not null "
+            Consulta = "select top(1) pr.CodigoEstablecimiento from Pedido pe, Producto pr where pe.CodigoAmazon = pr.CodigoAmazon and pe.OrdenDeAmazon = '" & OrdenDeAmazon & "' and CodigoDeRastreo is not null "
             Tablita.Clear()
             mostrar.ejecuta_query_dt(Consulta, Tablita, MyConString)
 
@@ -439,6 +608,8 @@ Module Module1
 
             Contador = 0
             Exito = False
+
+            'Just here
 
             Insertar_Paquete(CodigoDeRastreo, Guia, EnviadoPor, Descripcion, CadPeso, "", CadImpuesto, "1", "1", CodigoEstablecimiento, CodigoPaquete)
             Actualizar_Estado_Paquete_Venta(CodigoPaquete, CodigoDeRastreo, True)

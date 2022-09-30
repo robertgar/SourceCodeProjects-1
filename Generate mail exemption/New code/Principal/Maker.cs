@@ -6,10 +6,14 @@ using System.Data;
 
 namespace Principal{
     internal class ClassAsync { }
-    internal class Maker{
+    internal class Maker {
         private common.UseCommon use = new common.UseCommon();
         private connection.Execute execute = new connection.Execute();
         private DataTable tablita = new DataTable();
+
+        public Maker(Boolean DeAMentis) {
+            execute.setSimulation(DeAMentis);
+        }
 
         public void makeAll() {
             use.query.Clear();
@@ -69,8 +73,9 @@ namespace Principal{
             use.query.AppendLine("    )");
             use.query.AppendLine("    and isnull(sum(case when (cc.NuncaEnviarExencion = 1) then 1 else 0 end), 0) = 0");
             use.query.AppendLine("    and isnull(sum(case when (pe.Cantidad > 0 and pe.CodigoEstadoPedido != 4) then 1 else 0 end), 0) > 0");
-            
+            Console.WriteLine("Filling tab...");
             execute.fillTable(ref use.query, ref use.tabBuffer);
+            Console.WriteLine("Generando guides...");
 
             foreach (DataRow row in use.tabBuffer.Rows) {
                 generateGuide(row);
@@ -79,7 +84,7 @@ namespace Principal{
 
         private void generateGuide(DataRow row) {
             if (row["ProductsReceived"].ToString().Equals("0")) { return; }
-            
+
             use.query.Clear();
             use.query.Append(" declare @AmazonOrder varchar(50) = '").Append(row["ShortTracking"].ToString()).Append("'");
             use.query.AppendLine("    select");
@@ -100,9 +105,9 @@ namespace Principal{
             tablita.Clear();
             execute.fillTable(ref use.query, ref tablita);
 
-            if (!tablita.Rows[0]["Counter"].ToString().Equals("0")){
+            if (!tablita.Rows[0]["Counter"].ToString().Equals("0")) {
                 if (tablita.Rows[1]["Counter"].ToString().Equals("0")) { return; }
-                
+
                 use.query.Clear();
                 use.query.Append(" declare @AmazonOrder varchar(50) = '").Append(row["ShortTracking"].ToString()).Append("'");
                 use.query.AppendLine(" update");
@@ -113,16 +118,47 @@ namespace Principal{
                 use.query.AppendLine("    CodigoDeRastreo = @AmazonOrder");
                 use.query.AppendLine("    or CodigoDeRastreo like '%' + @AmazonOrder + '%'");
 
-                Console.WriteLine("Updated order with AmazonrOrder: " + row["ShortTracking"].ToString());
-                //execute.executeQuery(ref use.query);
+                execute.executeQuery(ref use.query, "Order has been updated successfully! Amazon order: " + row["ShortTracking"].ToString());
                 return;
             }
-            
+
             if (tablita.Rows[1]["Counter"].ToString().Equals("0")) { return; }
-            
-            //Insertarl paquete(codigoPaquete, precio, descripcion...)
-            Console.WriteLine("Insert package with AmazonOrder " + row["ShortTracking"].ToString());
-            return;
+
+            insertPackage(row["ShortTracking"].ToString(), row["AmazonOrder"].ToString());
+        }
+
+        private void insertPackage(String Traking, String AmazonOrder) {
+            use.query.Clear();
+            use.query.Append(" declare @Rastreo varchar(50) = '%").Append(Traking).Append("%'");
+            use.query.Append(" declare @AmazonOrder varchar(30) = '").Append(AmazonOrder).Append("'");
+            use.query.AppendLine(" select");
+            use.query.AppendLine("    pe.CodigoDeRastreo,");
+            use.query.AppendLine("    @Guide,");
+            use.query.AppendLine("    isnull(max(pe.Vendedor), '') as EnviadoPor,");
+            use.query.AppendLine("    iif(");
+            use.query.AppendLine("        trim(isnull(max(pe.TipoDeProducto), '')) != '',");
+            use.query.AppendLine("        replace(max(pe.TipoDeProducto), ',', ' '),");
+            use.query.AppendLine("        ''");
+            use.query.AppendLine("    ) as Descripcion,");
+            use.query.AppendLine("    sum(isnull(pr.Peso, 0)) as Peso,");
+            use.query.AppendLine("    iif(pe.OrdenDeAmazon = @AmazonOrder, pr.CodigoEstablecimiento, 0) as CodigoEstablecimiento,");
+            use.query.AppendLine("    max(pa.CodigoPaquete) as CodigoPaquete");
+            use.query.AppendLine(" from");
+            use.query.AppendLine("    Pedido as pe");
+            use.query.AppendLine("    inner join Producto as pr on pr.CodigoAmazon = pe.CodigoAmazon");
+            use.query.AppendLine("    inner join Paquete as pa on pa.CodigoDeRastreo like @Rastreo");
+            use.query.AppendLine(" where");
+            use.query.AppendLine("    pe.CodigoDeRastreo like @Rastreo");
+            use.query.AppendLine(" group by");
+            use.query.AppendLine("    pe.CodigoDeRastreo,");
+            use.query.AppendLine("    pe.OrdenDeAmazon,");
+            use.query.AppendLine("    pr.CodigoEstablecimiento");
+
+            execute.fillTable(ref use.query, ref use.tabBuffer);
+
+            foreach (DataRow row in use.tabBuffer.Rows) {
+                //Insertar paquete
+            }
         }
 
         private String getNewGuide() {
