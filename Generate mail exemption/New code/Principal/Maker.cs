@@ -105,35 +105,136 @@ namespace Principal{
             tablita.Clear();
             execute.fillTable(ref use.query, ref tablita);
 
-            if (!tablita.Rows[0]["Counter"].ToString().Equals("0")) {
+            if (tablita.Rows[0]["Counter"].ToString().Equals("0")) {
                 if (tablita.Rows[1]["Counter"].ToString().Equals("0")) { return; }
 
-                use.query.Clear();
-                use.query.Append(" declare @AmazonOrder varchar(50) = '").Append(row["ShortTracking"].ToString()).Append("'");
-                use.query.AppendLine(" update");
-                use.query.AppendLine("    Pedido");
-                use.query.AppendLine(" set");
-                use.query.AppendLine("    CodigoPaquete = (Select top 1 CodigoPaquete from Paquete where CodigoDeRastreo like '%' + @AmazonOrder + '%')");
-                use.query.AppendLine(" where");
-                use.query.AppendLine("    CodigoDeRastreo = @AmazonOrder");
-                use.query.AppendLine("    or CodigoDeRastreo like '%' + @AmazonOrder + '%'");
-
-                execute.executeQuery(ref use.query, "Order has been updated successfully! Amazon order: " + row["ShortTracking"].ToString());
+                insertPackage(row["ShortTracking"].ToString(), row["AmazonOrder"].ToString());
+                updatePackage(row["ShortTracking"].ToString());
                 return;
-            }
+            }            
 
             if (tablita.Rows[1]["Counter"].ToString().Equals("0")) { return; }
 
-            insertPackage(row["ShortTracking"].ToString(), row["AmazonOrder"].ToString());
+            use.query.Clear();
+            use.query.Append(" declare @AmazonOrder varchar(50) = '").Append(row["ShortTracking"].ToString()).Append("'");
+            use.query.AppendLine(" update");
+            use.query.AppendLine("    Pedido");
+            use.query.AppendLine(" set");
+            use.query.AppendLine("    CodigoPaquete = (Select max(CodigoPaquete) from Paquete where CodigoDeRastreo like '%' + @AmazonOrder + '%')");
+            use.query.AppendLine(" where");
+            use.query.AppendLine("    CodigoDeRastreo = @AmazonOrder");
+            use.query.AppendLine("    or CodigoDeRastreo like '%' + @AmazonOrder + '%'");
+
+            execute.executeQuery(ref use.query, "Order has been updated successfully! Amazon order: " + row["ShortTracking"].ToString());
         }
 
-        private void insertPackage(String Traking, String AmazonOrder) {
+        private void updatePackage(String Tracking) {
+            //Just here
+            if (validateTracking(Tracking).Equals("")) {
+                Console.WriteLine("Tracking: " + Tracking + " doesn't exists or there is more than one record with this tracking.");
+                return;
+            }
+
+            //Update order
             use.query.Clear();
-            use.query.Append(" declare @Rastreo varchar(50) = '%").Append(Traking).Append("%'");
+            use.query.Append(" declare @Tracking varchar(30) = '").Append(Tracking).Append("'");
+            use.query.AppendLine(" update");
+            use.query.AppendLine("    Pedido");
+            use.query.AppendLine(" set");
+            use.query.AppendLine("    CodigoPaquete = (");
+            use.query.AppendLine("        select");
+            use.query.AppendLine("            max(pa.CodigoPaquete) as CodigoPaquete");
+            use.query.AppendLine("        from");
+            use.query.AppendLine("            Paquete as pa");
+            use.query.AppendLine("        where");
+            use.query.AppendLine("            pa.CodigoDeRastreo like '%' + @Tracking + '%'");
+            use.query.AppendLine("    )");
+            use.query.AppendLine(" where");
+            use.query.AppendLine("    CodigoDeRastreo = (");
+            use.query.AppendLine("        select");
+            use.query.AppendLine("            max(pe.CodigoDeRastreo) as CodigoDeRastreo");
+            use.query.AppendLine("        from");
+            use.query.AppendLine("            Pedido as pe");
+            use.query.AppendLine("        where");
+            use.query.AppendLine("            pe.CodigoDeRastreo = @Tracking");
+            use.query.AppendLine("            or pe.CodigoDeRastreo like '%' + @Tracking + '%'");
+            use.query.AppendLine("    )");
+            //Update sales
+            use.query.AppendLine(" update");
+            use.query.AppendLine("    Venta");
+            use.query.AppendLine(" Set");
+            use.query.AppendLine("    CodigoEstadoEntrega = 3");
+            use.query.AppendLine(" where");
+            use.query.AppendLine("    CodigoEstadoEntrega = 2");
+            use.query.AppendLine("    and CodigoVenta in (");
+            use.query.AppendLine("        Select distinct");
+            use.query.AppendLine("            vp.CodigoVenta");
+            use.query.AppendLine("        from");
+            use.query.AppendLine("            VentaPedido vp inner join Pedido p on vp.CodigoPedido = p.CodigoPedido");
+            use.query.AppendLine("            inner join Venta v on vp.CodigoVenta = v.CodigoVenta");
+            use.query.AppendLine("            inner join Paquete pa on p.CodigoPaquete = pa.CodigoPaquete");
+            use.query.AppendLine("        where");
+            use.query.AppendLine("            v.CodigoEstadoEntrega = 2");
+            use.query.AppendLine("            And pa.GuiaAerea Is Not null");
+            use.query.AppendLine("            And p.CodigoPaquete = (select max(CodigoPaquete) from Paquete where CodigoDeRastreo like '%' +@Tracking + '%')");
+            use.query.AppendLine("    )");
+            //Update order warehouse
+            use.query.AppendLine(" update");
+            use.query.AppendLine("    Pedido");
+            use.query.AppendLine(" Set");
+            use.query.AppendLine("    CodigoEstadoPedido = 2");
+            use.query.AppendLine(" where");
+            use.query.AppendLine("    CodigoEstadoPedido = 1");
+            use.query.AppendLine("    and CodigoDeRastreo In (");
+            use.query.AppendLine("        Select top(1)");
+            use.query.AppendLine("            CodigoDeRastreo");
+            use.query.AppendLine("        from");
+            use.query.AppendLine("            Pedido");
+            use.query.AppendLine("        where");
+            use.query.AppendLine("            CodigoDeRastreo = @Tracking");
+            use.query.AppendLine("            or CodigoDeRastreo like '%' + @Tracking + '%'");
+            use.query.AppendLine("    )");
+
+            execute.executeQuery(ref use.query, "Order and Sales have been updated successfully! Trackin: " + Tracking);
+        }
+
+        private String validateTracking(String Tracking) {
+            if (Tracking.Length > 60) {
+                return "Tracking is very long.";
+            }
+
+            use.query.Clear();
+            use.query.Append(" declare @Tracking varchar(30) = '").Append("'");
+            use.query.AppendLine(" select");
+            use.query.AppendLine("    count(1) as TrackingExists");
+            use.query.AppendLine(" from");
+            use.query.AppendLine("    Pedido as pe");
+            use.query.AppendLine(" where");
+            use.query.AppendLine("    pe.CodigoEstadoPedido != 4");
+            use.query.AppendLine("    and (");
+            use.query.AppendLine("        pe.CodigoDeRastreo = @Tracking");
+            use.query.AppendLine("        or pe.CodigoDeRastreo like '%'  + @Tracking + '%'");
+            use.query.AppendLine("    )");
+
+            use.Nat = execute.getNat(ref use.query);
+
+            if (use.Nat == 0) {
+                return "Tracking doesn't exists.";
+            }
+
+            if (use.Nat > 1) {
+                return "There is more than one record with this tracking.";
+            }
+
+            return "";
+        }
+
+        private void insertPackage(String Tracking, String AmazonOrder) {
+            use.query.Clear();
+            use.query.Append(" declare @Rastreo varchar(50) = '%").Append(Tracking).Append("%'");
             use.query.Append(" declare @AmazonOrder varchar(30) = '").Append(AmazonOrder).Append("'");
             use.query.AppendLine(" select");
             use.query.AppendLine("    pe.CodigoDeRastreo,");
-            use.query.AppendLine("    @Guide,");
             use.query.AppendLine("    isnull(max(pe.Vendedor), '') as EnviadoPor,");
             use.query.AppendLine("    iif(");
             use.query.AppendLine("        trim(isnull(max(pe.TipoDeProducto), '')) != '',");
@@ -141,12 +242,10 @@ namespace Principal{
             use.query.AppendLine("        ''");
             use.query.AppendLine("    ) as Descripcion,");
             use.query.AppendLine("    sum(isnull(pr.Peso, 0)) as Peso,");
-            use.query.AppendLine("    iif(pe.OrdenDeAmazon = @AmazonOrder, pr.CodigoEstablecimiento, 0) as CodigoEstablecimiento,");
-            use.query.AppendLine("    max(pa.CodigoPaquete) as CodigoPaquete");
+            use.query.AppendLine("    iif(pe.OrdenDeAmazon = @AmazonOrder, pr.CodigoEstablecimiento, 0) as CodigoEstablecimiento");
             use.query.AppendLine(" from");
             use.query.AppendLine("    Pedido as pe");
             use.query.AppendLine("    inner join Producto as pr on pr.CodigoAmazon = pe.CodigoAmazon");
-            use.query.AppendLine("    inner join Paquete as pa on pa.CodigoDeRastreo like @Rastreo");
             use.query.AppendLine(" where");
             use.query.AppendLine("    pe.CodigoDeRastreo like @Rastreo");
             use.query.AppendLine(" group by");
@@ -156,9 +255,33 @@ namespace Principal{
 
             execute.fillTable(ref use.query, ref use.tabBuffer);
 
+            use.query.Clear();
             foreach (DataRow row in use.tabBuffer.Rows) {
-                //Insertar paquete
+                use.query.AppendLine(" insert into");
+                use.query.AppendLine("    Paquete (");
+                use.query.AppendLine("        CodigoDeRastreo,");
+                use.query.AppendLine("        GuiaAerea,");
+                use.query.AppendLine("        EnviadoPor,");
+                use.query.AppendLine("        Descripcion,");
+                use.query.AppendLine("        Peso,");
+                use.query.AppendLine("        Fecha,");
+                use.query.AppendLine("        Generado,");
+                use.query.AppendLine("        CodigoEstadoPaquete,");
+                use.query.AppendLine("        CodigoEstablecimiento");
+                use.query.AppendLine("    )values(");
+                use.query.Append("        '").Append(Tracking).Append("',");
+                use.query.Append("        '").Append(getNewGuide()).Append("',");
+                use.query.Append("        '").Append(row["EnviadoPor"].ToString()).Append("',");
+                use.query.Append("        '").Append(row["Descripcion"].ToString()).Append("',");
+                use.query.Append("        ").Append(row["Peso"].ToString()).Append(",");
+                use.query.Append("        getdate(),");
+                use.query.Append("        1,");
+                use.query.Append("        1,");
+                use.query.Append("        ").Append(row["CodigoEstablecimiento"]);
+                use.query.AppendLine(" )");
             }
+
+            execute.executeQuery(ref use.query, "Package has been added successfully! Amazon order: " + Tracking);
         }
 
         private String getNewGuide() {

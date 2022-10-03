@@ -151,7 +151,7 @@ Module Module1
                 If Not (((TotalImpuesto > 0 Or mostrar.retornarentero(query.ToString, MyConString) > 0)) And mostrar.retornarentero(Consulta2, MyConString) = 0 And NumSinCancelar > 0) Then Continue For
 
                 Generar_Guias(OrdenDeAmazon)
-
+                'Just here
                 If VerificarPaquete(OrdenDeAmazon, ListaGuias, ListaImpuestos) = False Then Continue For
 
                 Exito = True
@@ -609,8 +609,6 @@ Module Module1
             Contador = 0
             Exito = False
 
-            'Just here
-
             Insertar_Paquete(CodigoDeRastreo, Guia, EnviadoPor, Descripcion, CadPeso, "", CadImpuesto, "1", "1", CodigoEstablecimiento, CodigoPaquete)
             Actualizar_Estado_Paquete_Venta(CodigoPaquete, CodigoDeRastreo, True)
         Next row
@@ -650,7 +648,17 @@ Module Module1
     End Function
 
 
-    Sub Insertar_Paquete(ByVal Tracking As String, ByVal GuiaAerea As String, ByVal EnviadoPor As String, ByVal Descripcion As String, ByVal Peso As String, ByVal PesoVolumetrico As String, ByVal MontoImpuesto As String, ByVal Generado As String, ByVal EstadoPaquete As String, ByVal CodigoEstablecimiento As String, ByRef CodigoPaquete As Integer)
+    Sub Insertar_Paquete(ByVal Tracking As String,
+                         ByVal GuiaAerea As String,
+                         ByVal EnviadoPor As String,
+                         ByVal Descripcion As String,
+                         ByVal Peso As String,
+                         ByVal PesoVolumetrico As String,
+                         ByVal MontoImpuesto As String,
+                         ByVal Generado As String,
+                         ByVal EstadoPaquete As String,
+                         ByVal CodigoEstablecimiento As String,
+                         ByRef CodigoPaquete As Integer)
         If GuiaAerea <> "" Then
             GuiaAerea = "'" & GuiaAerea & "'"
         Else
@@ -715,7 +723,9 @@ Module Module1
         mostrar.insertarmodificareliminar(Consulta, MyConString)
     End Sub
 
-    Sub Actualizar_Estado_Paquete_Venta(ByVal CodigoPaquete As Integer, ByVal Tracking As String, ByVal WareHouseNotificacion As Boolean)
+    Sub Actualizar_Estado_Paquete_Venta(ByVal CodigoPaquete As Integer,
+                                        ByVal Tracking As String,
+                                        ByVal WareHouseNotificacion As Boolean)
         Dim TrackingReducido, CadTracking, Mensaje, MensajeError As String
         Dim dtventas As New DataTable
 
@@ -730,21 +740,33 @@ Module Module1
 
         If MensajeError = "Se encontró más de 1 tracking" Then Return
 
-        Consulta = "update Pedido set CodigoPaquete = " & CStr(CodigoPaquete) & " where CodigoDeRastreo in ( " &
-                            "select top(1) CodigoDeRastreo from Pedido where CodigoDeRastreo = '" & CadTracking & "' or CodigoDeRastreo like '%" & CadTracking & "%' )"
+        query.Clear()
+        query.AppendLine(" UPDATE")
+        query.AppendLine("   Pedido")
+        query.AppendLine(" SET")
+        query.AppendLine("   CodigoPaquete = " & CStr(CodigoPaquete) & "")
+        query.AppendLine(" WHERE")
+        query.AppendLine("   CodigoDeRastreo IN (")
+        query.AppendLine("     SELECT")
+        query.AppendLine("       TOP(1) CodigoDeRastreo")
+        query.AppendLine("     FROM")
+        query.AppendLine("       Pedido")
+        query.AppendLine("     WHERE")
+        query.AppendLine("       CodigoDeRastreo = '" & CadTracking & "'")
+        query.AppendLine("       OR CodigoDeRastreo LIKE '%" & CadTracking & "%'")
+        query.AppendLine("   )")
 
-        mostrar.insertarmodificareliminar(Consulta, MyConString)
+        mostrar.insertarmodificareliminar(query.ToString, MyConString)
 
         'Actualizacion y envio de correo de estado de entrega
-        Consulta = "select distinct vp.CodigoVenta from VentaPedido vp inner join Pedido p on vp.CodigoPedido = p.CodigoPedido inner join Venta v on vp.CodigoVenta = v.CodigoVenta "
-        Consulta += "inner join Paquete pa on p.CodigoPaquete = pa.CodigoPaquete where v.CodigoEstadoEntrega = 2 and pa.GuiaAerea is not null and p.CodigoPaquete = " + CodigoPaquete.ToString.Trim
+        Consulta = "Select distinct vp.CodigoVenta from VentaPedido vp inner join Pedido p On vp.CodigoPedido = p.CodigoPedido inner join Venta v On vp.CodigoVenta = v.CodigoVenta inner join Paquete pa On p.CodigoPaquete = pa.CodigoPaquete where v.CodigoEstadoEntrega = 2 And pa.GuiaAerea Is Not null And p.CodigoPaquete = " + CodigoPaquete.ToString.Trim
         mostrar.ejecuta_query_dt(Consulta, dtventas, MyConString)
 
         If dtventas.Rows.Count > 0 Then
             Try
                 For Each fila As DataRow In dtventas.Rows
                     'Actualiza el codigoestadoentrega 3 en venta
-                    Consulta = "update Venta set CodigoEstadoEntrega = 3 where CodigoVenta = " + fila("CodigoVenta").ToString + " and CodigoEstadoEntrega = 2"
+                    Consulta = "update Venta Set CodigoEstadoEntrega = 3 where CodigoVenta = " + fila("CodigoVenta").ToString + " And CodigoEstadoEntrega = 2"
                     mostrar.insertarmodificareliminar(Consulta, MyConString)
 
                     'Envio de correo de estado de entrega
@@ -754,11 +776,8 @@ Module Module1
         End If
         'Fin Actualizacion
 
-        If WareHouseNotificacion = True Then
-            Consulta = "update Pedido set CodigoEstadoPedido = 2 where CodigoDeRastreo in ( " &
-                            "select top(1) CodigoDeRastreo from Pedido where CodigoDeRastreo = '" & CadTracking & "' or CodigoDeRastreo like '%" & CadTracking & "%' " &
-                        ") and CodigoEstadoPedido = 1 "
-
+        If WareHouseNotificacion Then
+            Consulta = "update Pedido Set CodigoEstadoPedido = 2 where CodigoDeRastreo In (Select top(1) CodigoDeRastreo from Pedido where CodigoDeRastreo = '" & CadTracking & "' or CodigoDeRastreo like '%" & CadTracking & "%' ) and CodigoEstadoPedido = 1 "
             mostrar.insertarmodificareliminar(Consulta, MyConString)
         End If
     End Sub
@@ -772,17 +791,52 @@ Module Module1
 
         If Len(Tracking) > 60 Then
             MensajeError = "Tracking demasiado largo"
-            Exito = False
-            Return Exito
+            Return False
         End If
 
         'verifica si existe el tracking ingresado
-        Consulta = "select count(1)  from Pedido where (CodigoDeRastreo = '" & Tracking & "' or CodigoDeRastreo like '%" & Tracking & "%') and CodigoEstadoPedido <> 4 "
-        If mostrar.retornarentero(Consulta, MyConString) <> 0 Then 'no hay tracking
+        query.Clear()
+        query.AppendLine(" SELECT")
+        query.AppendLine("   COUNT(1)")
+        query.AppendLine(" FROM")
+        query.AppendLine("   Pedido")
+        query.AppendLine(" WHERE")
+        query.AppendLine("   (")
+        query.AppendLine("     CodigoDeRastreo = '" & Tracking & "'")
+        query.AppendLine("     OR CodigoDeRastreo LIKE '%" & Tracking & "%'")
+        query.AppendLine("   )")
+        query.AppendLine("   AND CodigoEstadoPedido <> 4")
+
+        If mostrar.retornarentero(query.ToString, MyConString) <> 0 Then 'no hay tracking
             'verifica si se encontró más de 1 tracking
-            Consulta = "select COUNT(1) from (select distinct replace(SUBSTRING(codigoderastreo, (CHARINDEX('(', codigoderastreo) + 1), (LEN(codigoderastreo) - CHARINDEX('(', codigoderastreo))),')','') as CodigoDeRastreo "
-            Consulta += "from Pedido where (CodigoDeRastreo = '" & Tracking & "' or CodigoDeRastreo like '%" & Tracking & "%') and CodigoEstadoPedido <> 4 ) t"
-            If mostrar.retornarentero(Consulta, MyConString) > 1 Then
+            query.Clear()
+            query.AppendLine(" SELECT")
+            query.AppendLine("   COUNT(1)")
+            query.AppendLine(" FROM")
+            query.AppendLine(" (")
+            query.AppendLine("   SELECT")
+            query.AppendLine("     DISTINCT REPLACE(")
+            query.AppendLine("       SUBSTRING(")
+            query.AppendLine("         codigoderastreo,")
+            query.AppendLine("         (CHARINDEX('(', codigoderastreo) + 1),")
+            query.AppendLine("         (")
+            query.AppendLine("           LEN(codigoderastreo) - CHARINDEX('(', codigoderastreo)")
+            query.AppendLine("         )")
+            query.AppendLine("       ),")
+            query.AppendLine("       ')',")
+            query.AppendLine("       ''")
+            query.AppendLine("     ) CodigoDeRastreo")
+            query.AppendLine("   FROM")
+            query.AppendLine("     Pedido")
+            query.AppendLine("   WHERE")
+            query.AppendLine("     (")
+            query.AppendLine("       CodigoDeRastreo = '" & Tracking & "'")
+            query.AppendLine("       OR CodigoDeRastreo LIKE '%" & Tracking & "%'")
+            query.AppendLine("     )")
+            query.AppendLine("     AND CodigoEstadoPedido <> 4")
+            query.AppendLine(" ) t")
+
+            If mostrar.retornarentero(query.ToString, MyConString) > 1 Then
                 MensajeError = "Se encontró más de 1 tracking"
                 Exito = False
             End If
@@ -793,23 +847,58 @@ Module Module1
         'verifica si el tracking es númerico (puede ser de Fedex)
         If IsNumeric(Tracking) = False Then
             MensajeError = "El tracking no existe"
-            Exito = False
-            Return Exito
+            Return False
         End If
 
         TrackingReducido = Microsoft.VisualBasic.Right(Tracking, 12)
         'verifica si existe el tracking 
-        Consulta = "select count(1)  from Pedido where (CodigoDeRastreo = '" & TrackingReducido & "' or CodigoDeRastreo like '%" & TrackingReducido & "%')  and CodigoEstadoPedido <> 4"
-        If mostrar.retornarentero(Consulta, MyConString) = 0 Then 'no hay tracking
+        query.Clear()
+        query.AppendLine(" SELECT")
+        query.AppendLine("   COUNT(1)")
+        query.AppendLine(" FROM")
+        query.AppendLine("   Pedido")
+        query.AppendLine(" WHERE")
+        query.AppendLine("   (")
+        query.AppendLine("     CodigoDeRastreo = '" & TrackingReducido & "'")
+        query.AppendLine("     OR CodigoDeRastreo LIKE '%" & TrackingReducido & "%'")
+        query.AppendLine("   )")
+        query.AppendLine("   AND CodigoEstadoPedido <> 4")
+
+        If mostrar.retornarentero(query.ToString, MyConString) = 0 Then 'no hay tracking
             MensajeError = "El tracking no existe"
             Exito = False
             Return Exito
         End If
 
         'verifica si se encontró más de 1 tracking
-        Consulta = "select COUNT(1) from (select distinct replace(SUBSTRING(codigoderastreo, (CHARINDEX('(', codigoderastreo) + 1), (LEN(codigoderastreo) - CHARINDEX('(', codigoderastreo))),')','') as CodigoDeRastreo "
-        Consulta += "from Pedido where (CodigoDeRastreo = '" & TrackingReducido & "' or CodigoDeRastreo like '%" & TrackingReducido & "%') and CodigoEstadoPedido <> 4 ) t"
-        If mostrar.retornarentero(Consulta, MyConString) > 1 Then
+        query.Clear()
+        query.AppendLine(" SELECT")
+        query.AppendLine("   COUNT(1)")
+        query.AppendLine(" FROM")
+        query.AppendLine(" (")
+        query.AppendLine("   SELECT")
+        query.AppendLine("     DISTINCT REPLACE(")
+        query.AppendLine("       SUBSTRING(")
+        query.AppendLine("         codigoderastreo,")
+        query.AppendLine("         (CHARINDEX('(', codigoderastreo) + 1),")
+        query.AppendLine("         (")
+        query.AppendLine("           LEN(codigoderastreo) - CHARINDEX('(', codigoderastreo)")
+        query.AppendLine("         )")
+        query.AppendLine("       ),")
+        query.AppendLine("       ')',")
+        query.AppendLine("       ''")
+        query.AppendLine("     ) CodigoDeRastreo")
+        query.AppendLine("   FROM")
+        query.AppendLine("     Pedido")
+        query.AppendLine("   WHERE")
+        query.AppendLine("     (")
+        query.AppendLine("       CodigoDeRastreo = '" & TrackingReducido & "'")
+        query.AppendLine("       OR CodigoDeRastreo LIKE '%" & TrackingReducido & "%'")
+        query.AppendLine("     )")
+        query.AppendLine("     AND CodigoEstadoPedido <> 4")
+        query.AppendLine(" ) t")
+
+        If mostrar.retornarentero(query.ToString, MyConString) > 1 Then
             MensajeError = "Se encontró más de 1 tracking"
             Exito = False
         End If
