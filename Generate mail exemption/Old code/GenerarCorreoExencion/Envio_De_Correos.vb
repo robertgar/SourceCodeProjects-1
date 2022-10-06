@@ -294,9 +294,7 @@ Public Class Envio_De_Correos
         Consulta += "(select Nombre from EmpresaDeEntrega where CodigoEmpresaDeEntrega = v.CodigoEmpresaDeEntrega) as EmpresaDeEntrega  FROM venta v WHERE CodigoEstadoDeVenta = 1 and codigoventa = " + codigoventa
         cargar.ejecuta_query_dt(Consulta, dtDatos, MyConString)
 
-        If dtDatos.Rows.Count <= 0 Then
-            Exit Sub
-        End If
+        If dtDatos.Rows.Count <= 0 Then Return
 
         Cuotas = 0
         EsPedido = 0
@@ -357,29 +355,14 @@ Public Class Envio_De_Correos
             End If
         End If
 
-        'Try
-        '    Nit = Factura.Substring(InStr(1, Factura, "Nit:", CompareMethod.Text) + 4, InStr(1, Factura, "Dir:", CompareMethod.Text) - InStr(1, Factura, "Nit:", CompareMethod.Text) - 5)
-        'Catch ex As Exception
-        '    Nit = ""
-        'End Try
-
-        'Try
-        '    DireccionFactura = Factura.Substring(Factura.LastIndexOf(":") + 1)
-        'Catch ex As Exception
-        '    DireccionFactura = ""
-        'End Try
-
-        Consulta = ""
-        Consulta = "select '/' + " & mostrar.Reemplazar_Cadena_Url("c.Nombre") & " + '/' + " & mostrar.Reemplazar_Cadena_Url("p.Nombre") & " + '/' from Producto p, Categoria c " &
-                     "where p.CodigoCategoria = c.CodigoCategoria " &
-                     "and p.CodigoProducto = " & CodigoProducto
+        Consulta = "select '/' + " & mostrar.Reemplazar_Cadena_Url("c.Nombre") & " + '/' + " & mostrar.Reemplazar_Cadena_Url("p.Nombre") & " + '/' from Producto p, Categoria c where p.CodigoCategoria = c.CodigoCategoria and p.CodigoProducto = " & CodigoProducto
 
         CadenaUrl = mostrar.retornarcadena(Consulta, MyConString)
         CadenaUrl = mostrar.Longitud_Url(CadenaUrl)
 
         PaginaProducto = "http://www.guatemaladigital.com" & CadenaUrl & "Producto.aspx?Codigo=" & CodigoProducto
 
-        If Trim(Foto) <> "" Then
+        If Foto.Trim <> "" Then
             If InStr(Foto, "http") = 0 Then
                 If Mid(Foto, 1, 1) <> "/" And Mid(Foto, 1, 1) <> "\" Then
                     Foto = "/" + Foto
@@ -390,15 +373,12 @@ Public Class Envio_De_Correos
         End If
 
         'Codigo que genera información de la barra de rastreo
-        Consulta = ""
         Consulta = "select case when EsPedido IS Not null then 6 when EsPedido IS NULL and CodigoDeRastreo IS not null then 3 when EsPedido IS NULL and CodigoDeRastreo IS null then 2 end as pasos  from Venta where CodigoVenta = '" + codigoventa + "'"
         total_pasos = cargar.retornarentero(Consulta, MyConString)
 
-        Consulta = ""
         Consulta = "select cast(codigoestadoentrega as int) from Venta where CodigoVenta = '" + codigoventa + "'"
         codigo_estado_entrega = cargar.retornarentero(Consulta, MyConString)
 
-        Consulta = ""
         Consulta = "SELECT CodigoEstadoEntrega, nombre,  Etapa, ISNULL(CASE WHEN CodigoEstadoEntrega = 1 "
         Consulta += "THEN (SELECT CONVERT(varchar(10), CONVERT(date, fechadeorden, 106), 103) "
         Consulta += "FROM Pedido WHERE CodigoPedido = (SELECT CodigoPedido FROM VentaPedido "
@@ -423,7 +403,7 @@ Public Class Envio_De_Correos
         If dt_estados_entrega.Rows.Count <= 0 Then
             texto_status = "Sin Datos Para Rastreo"
             div_visible = "Visible = 'False'"
-            Exit Sub
+            Return
         End If
 
         cadena = ""
@@ -466,7 +446,7 @@ Public Class Envio_De_Correos
 
         Consulta = "select REPLACE(Nombre,'Bodega','En bodega') as Nombre from estadoentrega where CodigoEstadoEntrega = " + codigo_estado_entrega.ToString
         texto_estado = cargar.retornarcadena(Consulta, MyConString)
-
+        'Saw here
         Titulo = "Tu orden " + codigoventa + " de GuatemalaDigital esta " + texto_estado + "."
 
         'maneja la cantidad de divs que ha avanzado en la barra
@@ -620,10 +600,7 @@ Public Class Envio_De_Correos
 
         Try
             Enviar_Correo("info@guatemaladigital.com", CorreoCliente, Titulo, Contenido, "")
-        Catch ex As Exception
-
-        End Try
-
+        Catch ex As Exception : End Try
     End Sub
 
     'Sub Envio_SMS(ByVal telefono As String, ByVal mensaje As String)

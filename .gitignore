@@ -136,3 +136,5 @@ _NCrunch*
 *.vsidx
 *.v2
 *.cache
+*.dll
+*.pdb

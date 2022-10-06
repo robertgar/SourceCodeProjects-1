@@ -10,9 +10,11 @@ namespace Principal{
         private common.UseCommon use = new common.UseCommon();
         private connection.Execute execute = new connection.Execute();
         private DataTable tablita = new DataTable();
+        private connection.SendEmails email = new connection.SendEmails();
 
         public Maker(Boolean DeAMentis) {
-            execute.setSimulation(DeAMentis);
+            execute.setSimulation(ref DeAMentis);
+            email.setSimulation(ref DeAMentis);
         }
 
         public void makeAll() {
@@ -104,14 +106,14 @@ namespace Principal{
             use.query.AppendLine("        CodigoDeRastreo like '%' + @AmazonOrder + '%'");
             tablita.Clear();
             execute.fillTable(ref use.query, ref tablita);
-
+                        
             if (tablita.Rows[0]["Counter"].ToString().Equals("0")) {
                 if (tablita.Rows[1]["Counter"].ToString().Equals("0")) { return; }
 
                 insertPackage(row["ShortTracking"].ToString(), row["AmazonOrder"].ToString());
                 updatePackage(row["ShortTracking"].ToString());
                 return;
-            }            
+            }
 
             if (tablita.Rows[1]["Counter"].ToString().Equals("0")) { return; }
 
@@ -196,6 +198,7 @@ namespace Principal{
             use.query.AppendLine("    )");
 
             execute.executeQuery(ref use.query, "Order and Sales have been updated successfully! Trackin: " + Tracking);
+            email.sendTrackingEmail(ref Tracking);
         }
 
         private String validateTracking(String Tracking) {

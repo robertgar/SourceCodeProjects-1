@@ -13,11 +13,11 @@ namespace connection{
         private DataTable Buffer = new DataTable();
         private Boolean isSimulation;
 
-        public void setSimulation(Boolean deAMentis) {
+        public void setSimulation(ref Boolean deAMentis) {
             this.isSimulation = deAMentis;
         }
 
-        public String getValue(ref StringBuilder query, String Error = ""){
+        public String getValue(ref StringBuilder query, [Optional] String Error){
             fillTable(ref query, ref Buffer);
 
             try {
@@ -63,6 +63,18 @@ namespace connection{
                 command.ExecuteNonQuery();
                 connector.Close();
             }catch (Exception e) { }
+        }
+
+        public String getParameter(int ParameterCode, [Optional] String error) {
+            StringBuilder query = new StringBuilder();
+            query.AppendLine(" select");
+            query.AppendLine("    Valor");
+            query.AppendLine(" from");
+            query.AppendLine("    Parametro");
+            query.AppendLine(" where");
+            query.Append("    CodigoParametro = ").Append(ParameterCode);
+
+            return getValue(ref query, error);
         }
     }
 }
