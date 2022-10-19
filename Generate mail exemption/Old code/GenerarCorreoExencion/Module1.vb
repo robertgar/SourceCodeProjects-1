@@ -151,7 +151,7 @@ Module Module1
                 If Not (((TotalImpuesto > 0 Or mostrar.retornarentero(query.ToString, MyConString) > 0)) And mostrar.retornarentero(Consulta2, MyConString) = 0 And NumSinCancelar > 0) Then Continue For
 
                 Generar_Guias(OrdenDeAmazon)
-                'Just here
+                
                 If VerificarPaquete(OrdenDeAmazon, ListaGuias, ListaImpuestos) = False Then Continue For
 
                 Exito = True
@@ -176,6 +176,8 @@ Module Module1
 
                     If Exito = False Then Continue For
 
+                    'Revisar
+
                     NombreArchivo = ""
                     Dim FormGuia As New GuiaPdf
                     Exito = FormGuia.Crear_Reporte_Pdf(texto(i), NombreArchivo, MyConString, Mensaje)
@@ -194,13 +196,15 @@ Module Module1
                 If Exito = False Then
                     Subject = "Error procedimiento Correo de Exencion"
                     Contenido = "Orden Amazon: " + OrdenDeAmazon + ", " + Mensaje
-                    'enviar.Enviar_Correo("cpx@guatemaladigital.net", "archivoslab@yahoo.es", Subject, Contenido, "")
+                    
                     If CanalMostrarAlerta <> "" Then
                         EnviarAlertaSlackPromocion("ALERTA-EXENCION", Contenido, Subject, "Generar_CorreoExencion", CanalMostrarAlerta)
                     End If
 
                     Return
                 End If
+
+                'Just here
 
                 query.Clear()
                 query.AppendLine(" SELECT")
@@ -357,23 +361,23 @@ Module Module1
         Dim Exito As Boolean
         Dim CodigoDeRastreo As String
         'Dim Consulta As String
-        Dim TrackingNulo As Integer
+        'Dim TrackingNulo As Integer
         Dim GuiaAerea As String
 
         'número de líneas de la orden que no tienen tracking (codigoderastreo = null)
-        query.Clear()
-        query.AppendLine(" SELECT")
-        query.AppendLine("   COUNT(1)")
-        query.AppendLine(" FROM")
-        query.AppendLine("   Pedido")
-        query.AppendLine(" WHERE")
-        query.AppendLine("   OrdenDeAmazon = '" & OrdenDeAmazon & "'")
-        query.AppendLine("   AND (")
-        query.AppendLine("     CodigoDeRastreo IS NULL")
-        query.AppendLine("     OR LEN(codigoderastreo) = 0")
-        query.AppendLine("   )")
+        'query.Clear()
+        'query.AppendLine(" SELECT")
+        'query.AppendLine("   COUNT(1)")
+        'query.AppendLine(" FROM")
+        'query.AppendLine("   Pedido")
+        'query.AppendLine(" WHERE")
+        'query.AppendLine("   OrdenDeAmazon = '" & OrdenDeAmazon & "'")
+        'query.AppendLine("   AND (")
+        'query.AppendLine("     CodigoDeRastreo IS NULL")
+        'query.AppendLine("     OR LEN(codigoderastreo) = 0")
+        'query.AppendLine("   )")
 
-        TrackingNulo = mostrar.retornarentero(query.ToString, MyConString)
+        'TrackingNulo = mostrar.retornarentero(query.ToString, MyConString)
 
         'total de tracking de la orden
         query.Clear()
@@ -431,7 +435,7 @@ Module Module1
                 If ListaImpuestos = "" Then
                     ListaImpuestos = row("Impuesto").ToString
                 Else
-                    ListaImpuestos = ListaImpuestos & "," & row("Impuesto").ToString
+                    ListaImpuestos += "," + row("Impuesto").ToString
                 End If
             End If
 
@@ -445,8 +449,7 @@ Module Module1
 
             TotalPaquete = TotalPaquete + 1
             Consulta = "select isnull(GuiaAerea,'') from Paquete where codigoderastreo like '%" & CodigoDeRastreo & "%' "
-            GuiaAerea = mostrar.retornarcadena(Consulta, MyConString)
-            GuiaAerea = Trim(GuiaAerea)
+            GuiaAerea = mostrar.retornarcadena(Consulta, MyConString).Trim
 
             If GuiaAerea = "" Then
                 GuiaAerea = Obtener_Nueva_Guia()

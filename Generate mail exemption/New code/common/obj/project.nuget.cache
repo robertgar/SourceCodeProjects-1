@@ -1,8 +1,43 @@
 {
   "version": 2,
-  "dgSpecHash": "Rmets5SOqAHvjdWm1H1N/VeSQ8x6Xok9fZpJlutVJaST9XknFrKP4Ne0vtwzE3yPzigl4KICiX8jySEQM2Wpgw==",
+  "dgSpecHash": "h4ghzy52PmdulF8tQB7A2kliFGv6Dgk6g5doXjxxKndsnyU8bUY/TfSm9e1sIKkdY6zpHa4xK7zKQ3axh/nLIw==",
   "success": true,
-  "projectFilePath": "C:\\Users\\User\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\common\\common.csproj",
-  "expectedPackageFiles": [],
-  "logs": []
+  "projectFilePath": "C:\\Users\\yuno\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\common\\common.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\yuno\\.nuget\\packages\\bouncycastle\\1.8.9\\bouncycastle.1.8.9.nupkg.sha512",
+    "C:\\Users\\yuno\\.nuget\\packages\\itextsharp\\5.5.13.3\\itextsharp.5.5.13.3.nupkg.sha512",
+    "C:\\Users\\yuno\\.nuget\\packages\\itextsharp.xmlworker\\5.5.13.3\\itextsharp.xmlworker.5.5.13.3.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'BouncyCastle 1.8.9' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net6.0'. This package may not be fully compatible with your project.",
+      "libraryId": "BouncyCastle",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'iTextSharp 5.5.13.3' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net6.0'. This package may not be fully compatible with your project.",
+      "libraryId": "iTextSharp",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'itextsharp.xmlworker 5.5.13.3' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net6.0'. This package may not be fully compatible with your project.",
+      "libraryId": "itextsharp.xmlworker",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    }
+  ]
 }

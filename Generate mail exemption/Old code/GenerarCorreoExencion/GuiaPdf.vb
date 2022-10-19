@@ -103,7 +103,13 @@ Public Class GuiaPdf
     End Function
 
     'Gloria Tarea 245 23-feb-2018, Separar los formatos de exención por Importador
-    Function Crear_Reporte_Pdf(ByVal Guia As String, ByRef NombreArchivo As String, ByVal conString As String, ByRef Mensaje As String) As Boolean
+    'Just here
+    Function Crear_Reporte_Pdf(
+        ByVal Guia As String, 
+        ByRef NombreArchivo As String, 
+        ByVal conString As String, 
+        ByRef Mensaje As String
+        ) As Boolean
         Dim bResultado As Boolean = False
         Dim EnviarExencion As Boolean
 
@@ -123,18 +129,10 @@ Public Class GuiaPdf
                 Case Else 'no hay importador
                     If EnviarExencion = True Then 'verifica si la línea de pedido se debe enviar correo, de ser así mandar alerta de error
                         Mensaje = "No se encontró el código de Importador en el pedido. Guía : " & Guia
-                        'If CodigoImportador = 1 Then 'YoCargo
-                        '    Mensaje = "El Importador en el pedido. Guía : " & Guia & " no tiene configurado la creación de archivos PDF que se adjuntan al correo que se va a enviar"
-                        'Else
-                        '    Mensaje = "No se encontró el código de Importador en el pedido. Guía : " & Guia
-                        'End If
-
-
                     Else 'en el campo observaciones se agregó No-Enviar_Exencion y el proceso la debe ignorar
                         bResultado = True
                         NombreArchivo = ""
                     End If
-
             End Select
         Catch ex As Exception
             Mensaje = ex.Message.ToString
@@ -149,18 +147,7 @@ Public Class GuiaPdf
     '***********************************************************
 
     Function Crear_Reporte_Pdf_CPX(ByVal Guia As String, ByRef NombreArchivo As String, ByRef Mensaje As String) As Boolean
-        'Dim CodigoPaquete As Integer = 0
-        'Dim EnviadoPor, Descripcion, Tracking As String
-        'Dim Peso As Decimal
-
-        'Mensaje = ""
-        'MyconString = conString
         Try
-            'EnviadoPor = "" : Descripcion = "" : Tracking = ""
-            'Obtener_Datos_Guia(Guia, CodigoPaquete, EnviadoPor, Descripcion, Peso, Tracking)
-
-            'Obtener_Datos_Importador(Guia) '>> Gloria Tarea 234 21-feb-2018
-
             Dim TablaGeneral As PdfPTable = New PdfPTable(1)
             TablaGeneral.DefaultCell.Border = Rectangle.NO_BORDER
             TablaGeneral.WidthPercentage = 100
@@ -212,10 +199,10 @@ Public Class GuiaPdf
             doc1.Close()
             writer.Close()
 
-            Crear_Reporte_Pdf_CPX = True
+            Return True
         Catch ex As Exception
             Mensaje = ex.Message.ToString
-            Crear_Reporte_Pdf_CPX = False
+            Return False
         End Try
     End Function
 
@@ -571,10 +558,10 @@ Public Class GuiaPdf
             doc1.Close()
             writer.Close()
 
-            Crear_Reporte_Pdf_PidoBox = True
+            Return True
         Catch ex As Exception
             Mensaje = ex.Message.ToString
-            Crear_Reporte_Pdf_PidoBox = False
+            Return False
         End Try
     End Function
 
@@ -1001,8 +988,14 @@ Public Class GuiaPdf
         Validar_Tracking = Exito
     End Function
 
-    Sub Obtener_Datos_Guia(ByVal Guia As String, ByRef CodigoPaquete As Integer, ByRef EnviadoPor As String, ByRef Descripcion As String, ByRef Peso As Decimal, ByRef Tracking As String)
-
+    Sub Obtener_Datos_Guia(
+        ByVal Guia As String, 
+        ByRef CodigoPaquete As Integer, 
+        ByRef EnviadoPor As String, 
+        ByRef Descripcion As String, 
+        ByRef Peso As Decimal, 
+        ByRef Tracking As String
+        )
 
         'obtener producto
         Consulta = "select CodigoPaquete, EnviadoPor, Descripcion, Peso, CodigoDeRastreo from Paquete where GuiaAerea = '" & Guia & "'"

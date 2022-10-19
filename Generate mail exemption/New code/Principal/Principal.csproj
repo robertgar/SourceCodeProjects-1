@@ -12,6 +12,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspose.PDF" Version="22.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\common\common.csproj" />
     <ProjectReference Include="..\connection\connection.csproj" />
   </ItemGroup>

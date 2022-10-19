@@ -1,5 +1,5 @@
-declare @Temp table(AmazonOrder varchar(50))
-insert into @Temp
+ declare @Temp table(AmazonOrder varchar(50))
+ insert into @Temp
     select
         oc.OrdenDeAmazon
     from
@@ -12,23 +12,17 @@ insert into @Temp
     having
         isnull(
             sum(
-                case when (
-                    p.Cantidad > 0
-                    and p.CodigoEstadoPedido in (1, 2, 6)
-                ) then 1 else 0 end
+                iif(p.Cantidad > 0 and p.CodigoEstadoPedido in (1, 2, 6), 1, 0)
             ), 0
         ) = 0
-            
-select
+ select
     pe.OrdenDeAmazon as AmazonOrder,
     isnull(
         sum(
-            case when (
-                pe.CodigoEstadoPedido = 3
-            ) then 1 else 0 end
+            iif(pe.CodigoEstadoPedido = 3, 1, 0)
         ), 0
     ) as ProductsReceived,
-    case 
+    case
         when (
             charindex('(', pe.CodigoDeRastreo) > 0
             and charindex(')', pe.CodigoDeRastreo) > 0
@@ -40,17 +34,17 @@ select
             )
         ) else pe.CodigoDeRastreo
     end as ShortTracking
-from
+ from
     Pedido as pe
     inner join CuentaDeCompra as cc on cc.Correo = pe.Correo
     inner join @Temp as t on t.AmazonOrder = pe.OrdenDeAmazon
-group by
+ group by
     pe.OrdenDeAmazon,
     pe.CodigoDeRastreo
-having
+ having
     (
-        isnull(SUM(case when (pe.CodigoDeRastreo is not null) then pe.Impuesto else 0 end),0) > 0
-        or isnull(sum(case when (cc.SiempreEnviarExencion = 1) then 1 else 0 end), 0) > 0
+        isnull(SUM(iif(pe.CodigoDeRastreo is not null, pe.Impuesto, 0)),0) > 0
+        or isnull(sum(iif(cc.SiempreEnviarExencion = 1, 1, 0)), 0) > 0
     )
-    and isnull(sum(case when (cc.NuncaEnviarExencion = 1) then 1 else 0 end), 0) = 0
-    and isnull(sum(case when (pe.Cantidad > 0 and pe.CodigoEstadoPedido != 4) then 1 else 0 end), 0) > 0
+    and isnull(sum(iif(cc.NuncaEnviarExencion = 1, 1, 0)), 0) = 0
+    and isnull(sum(iif(pe.Cantidad > 0 and pe.CodigoEstadoPedido != 4, 1, 0)), 0) > 0

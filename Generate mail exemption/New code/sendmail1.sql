@@ -43,7 +43,8 @@ select
     p.Foto,
     v.NombreRecibido,
     v.FechaEntrega,
-    ee.Nombre as EmpresaDeEntrega
+    ee.Nombre as EmpresaDeEntrega,
+    v.CodigoEstadoEntrega
 from
     Venta as v
     inner join FormaDePago as fp on fp.CodigoFormaDePago = v.CodigoFormaDePago
