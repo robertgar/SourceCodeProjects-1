@@ -59,5 +59,32 @@ namespace common.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;table style=&quot;width: 100%; font-size: 14px;&quot;&gt;
+        ///    &lt;tr&gt;
+        ///        &lt;td&gt;
+        ///        &lt;/td&gt;
+        ///        &lt;td align=&quot;center&quot;&gt;
+        ///            3750 NW 28 Street Unit
+        ///            &lt;br /&gt;101, Miami Florida, 33142
+        ///            &lt;br /&gt;Phone (305) 634-2757
+        ///        &lt;/td&gt;
+        ///        &lt;td align=&quot;center&quot;&gt;
+        ///            @GuideCode
+        ///        &lt;/td&gt;
+        ///    &lt;/tr&gt;
+        ///&lt;/table&gt;
+        ///
+        ///&lt;table style=&quot;padding: 0px; width: 100%; font-weight: bold; font-size: 16px; border-top: 2px black solid; text-align: center;&quot;&gt;
+        ///    &lt;tr&gt;
+        ///        &lt;td&gt;
+        ///            &lt;h5&gt;E [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string TemplateFileMail {
+            get {
+                return ResourceManager.GetString("TemplateFileMail", resourceCulture);
+            }
+        }
     }
 }

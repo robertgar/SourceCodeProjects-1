@@ -2,12 +2,42 @@
 <html lang="en">
 <head>
     <title>Template</title>
+    <style>
+        .tablita{
+            width: 100%;
+            font-size: 14px;
+        }
+        .tabData{
+            width: 100%;
+            border: 4px solid black;
+            font-size: 14px;
+            padding: 5px;
+            border-radius: 10px;
+        }
+        .header{
+            padding: 0px;
+            width: 100%;
+            font-weight: bold;
+            font-size: 16px;
+            border-top: 2px black solid;
+            text-align: center;
+        }
+        .tabList{
+            padding-top: 20px;
+            width: 50%;
+            font-size: 14px;
+        }
+        img{
+            width: 200px;
+            height: 100px;
+        }
+    </style>
 </head>
 <body>
-    <table>
+    <table class="tablita">
         <tr>
             <td>
-                <img src="https://pidoboxmiami.com/wp-content/uploads/2019/03/Logo-Pidobox-LLC.png" width="200" height="100"/>
+                <img src=@SrcImage />
             </td>
             <td align="center">
                 3750 NW 28 Street Unit
@@ -15,12 +45,12 @@
                 <br/>Phone (305) 634-2757
             </td>
             <td align="center">
-                CodigoDeBarras
+                @GuideCode
             </td>
         </tr>
     </table>
-    <table>
-        <tr align="center">
+    <table class="header">
+        <tr>
             <td>
                 <h5>Enviado por (remitente):</h5>
             </td>
@@ -29,10 +59,10 @@
             </td>
         </tr>
     </table>
-    <table border="1">
+    <table class="tabData">
         <tr>
             <td>
-                <table>
+                <table class="tablita">
                     <tr>
                         <td align="right">Nombre remitente o compañía:</td>
                         <td>@CompanyName</td>
@@ -48,7 +78,7 @@
                 </table>
             </td>
             <td>
-                <table>
+                <table class="tablita">
                     <tr>
                         <td align="right">Nombre:</td>
                         <td>Guatemala Digital S.A.</td>
@@ -69,7 +99,7 @@
             </td>
         </tr>
     </table>
-    <table>
+    <table class="tabList">
         <tr>
             <td align="right">Fecha:</td>
             <td>@Date</td>

@@ -12,7 +12,11 @@ using System.Text;
 namespace common{
     public class GuidePdf{
         public Boolean createPDFReport(String Guide, ref StringBuilder attachments) {
-            String body = "";
+            iTextSharp.text.Image img = iTextSharp.text.Image.GetInstance("https://pidoboxmiami.com/wp-content/uploads/2019/03/Logo-Pidobox-LLC.png");
+            img.ScaleToFit(200, 100);
+            img.SetAbsolutePosition(10, 760);
+
+            String body = Properties.Resources.TemplateFileMail.ToString();
             Console.WriteLine(body);
             using (FileStream stream = new FileStream("C:\\Users\\yuno\\Desktop\\angular.pdf", FileMode.Create)) {
                 iTextSharp.text.Document Pdf = new iTextSharp.text.Document(iTextSharp.text.PageSize.A4, 50, 50, 50, 50);
@@ -21,6 +25,7 @@ namespace common{
 
                 Pdf.Open();
                 Pdf.Add(new Phrase(""));
+                Pdf.Add(img);
 
                 using (StringReader sr = new StringReader(body)) {
                     XMLWorkerHelper.GetInstance().ParseXHtml(writer, Pdf, sr);
@@ -29,6 +34,7 @@ namespace common{
                 Pdf.Close();
                 stream.Close();
             }
+
             return true;
         }
     }
