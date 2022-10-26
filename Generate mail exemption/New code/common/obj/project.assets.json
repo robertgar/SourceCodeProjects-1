@@ -89,19 +89,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\yuno\\.nuget\\packages\\": {}
+    "C:\\Users\\User\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\yuno\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\common\\common.csproj",
+      "projectUniqueName": "C:\\Users\\User\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\common\\common.csproj",
       "projectName": "common",
-      "projectPath": "C:\\Users\\yuno\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\common\\common.csproj",
-      "packagesPath": "C:\\Users\\yuno\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\yuno\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\common\\obj\\",
+      "projectPath": "C:\\Users\\User\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\common\\common.csproj",
+      "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\User\\Documents\\GitHub\\SourceCodeProjects\\Generate mail exemption\\New code\\common\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\yuno\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -152,7 +152,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.402\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.401\\RuntimeIdentifierGraph.json"
       }
     }
   },

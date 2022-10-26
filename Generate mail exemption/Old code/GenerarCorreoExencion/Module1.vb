@@ -247,8 +247,7 @@ Module Module1
                 'enviar correo
                 Subject = "Tax exempt for " & Correo
 
-                Contenido = "Good day, attached proof of export.<br/><br/>E-mail account: " & Correo & "<br/>Order numbers:<br/>" &
-                                                OrdenDeAmazon & "<br/><br/><br/>Best Regards,<br/>Mario Porres<br/><br/>"
+                Contenido = "Good day, attached proof of export.<br/><br/>E-mail account: " & Correo & "<br/>Order numbers:<br/>" & OrdenDeAmazon & "<br/><br/><br/>Best Regards,<br/>Mario Porres<br/><br/>"
 
                 If ArchivosAdjuntos = "" Then Continue For
 

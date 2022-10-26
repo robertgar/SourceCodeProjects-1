@@ -15,32 +15,21 @@
                 iif(p.Cantidad > 0 and p.CodigoEstadoPedido in (1, 2, 6), 1, 0)
             ), 0
         ) = 0
+        
+        
  select
     pe.OrdenDeAmazon as AmazonOrder,
     isnull(
         sum(
             iif(pe.CodigoEstadoPedido = 3, 1, 0)
         ), 0
-    ) as ProductsReceived,
-    case
-        when (
-            charindex('(', pe.CodigoDeRastreo) > 0
-            and charindex(')', pe.CodigoDeRastreo) > 0
-        ) then (
-            substring(
-                pe.CodigoDeRastreo,
-                charindex('(', pe.CodigoDeRastreo) + 1,
-                charindex(')', pe.CodigoDeRastreo) - charindex('(', pe.CodigoDeRastreo) - 1
-            )
-        ) else pe.CodigoDeRastreo
-    end as ShortTracking
+    ) as ProductsReceived
  from
     Pedido as pe
     inner join CuentaDeCompra as cc on cc.Correo = pe.Correo
     inner join @Temp as t on t.AmazonOrder = pe.OrdenDeAmazon
  group by
-    pe.OrdenDeAmazon,
-    pe.CodigoDeRastreo
+    pe.OrdenDeAmazon
  having
     (
         isnull(SUM(iif(pe.CodigoDeRastreo is not null, pe.Impuesto, 0)),0) > 0

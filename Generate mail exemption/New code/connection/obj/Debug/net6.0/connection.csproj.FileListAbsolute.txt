@@ -43,3 +43,5 @@ C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New co
 C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\refint\connection.dll
 C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.pdb
 C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\ref\connection.dll
+C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.Properties.Resources.resources
+C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.csproj.GenerateResource.cache

@@ -195,8 +195,15 @@ Public Class Envio_De_Correos
 
 
 
-    Function Enviar_Correo_Con_Attachment_Verificar_Error(ByVal DireccionCorreoOrigen As String, ByVal DireccionCorreoDestino As String, ByVal Titulo As String, ByVal Contenido As String, ByVal CorreosAlternos As String, ByVal ArchivosIncrustados As String) As Boolean
-        Dim Mensaje As String
+    Function Enviar_Correo_Con_Attachment_Verificar_Error(
+        ByVal DireccionCorreoOrigen As String, 
+        ByVal DireccionCorreoDestino As String, 
+        ByVal Titulo As String, 
+        ByVal Contenido As String, 
+        ByVal CorreosAlternos As String, 
+        ByVal ArchivosIncrustados As String
+        ) As Boolean
+
         Dim ImagenEncabezado As String
         Dim ImagenBarra As String
         Dim ImagenDesuscripcion As String
@@ -204,11 +211,8 @@ Public Class Envio_De_Correos
         Dim correo As New System.Net.Mail.MailMessage
 
         Try
-
-
             correo.From = New System.Net.Mail.MailAddress(DireccionCorreoOrigen, "GuatemalaDigital.com")
-            'correo.Bcc.Add("info@guatemaladigital.com")
-
+            
             If CorreosAlternos <> "" Then
                 Texto = Split(CorreosAlternos, ",")
                 For i = 0 To Texto.Length - 1
@@ -223,7 +227,6 @@ Public Class Envio_De_Correos
             If ArchivosIncrustados <> "" Then
                 Archivos = Split(ArchivosIncrustados, ",")
                 For i = 0 To Archivos.Length - 1
-                    'correo.Attachments.Add(New Attachment("c:\\temp\\example.txt"))
                     correo.Attachments.Add(New System.Net.Mail.Attachment(Archivos(i)))
                 Next
             End If
@@ -232,21 +235,7 @@ Public Class Envio_De_Correos
             ImagenBarra = "http://www.guatemaladigital.com//images/CorreoEncabezado.jpg"
             ImagenDesuscripcion = "http://www.guatemaladigital.com//images/Desuscripcion.png"
 
-            'Mensaje = "<table style=""width:800px; border-width:1px;  border-style:solid""> " & _
-            '"<tr> " & _
-            '"<td align=""left""> " & _
-            '"<img src='" & ImagenEncabezado & "' alt=""cargando imagen"" width=""800px""> " & _
-            '"<img src='" & ImagenBarra & "' alt=""cargando imagen"" width=""800px""> " & _
-            ' Contenido & _
-            '"<img src='" & ImagenBarra & "' alt=""cargando imagen"" width=""800px""> " & _
-            '" </td> " & _
-            '"</tr> " & _
-            '"</table> "
-
-            Mensaje = Contenido
-
-
-            correo.Body = Mensaje
+            correo.Body = Contenido
 
             correo.IsBodyHtml = True
             correo.Priority = System.Net.Mail.MailPriority.Normal
@@ -257,10 +246,9 @@ Public Class Envio_De_Correos
             smtp.Credentials = New System.Net.NetworkCredential("AKIAJFKC2GTUH7X3AISA", "Ao0QQUw2/KRPfQLSH5Msg+zmx0iXe+1hwThQXqoHxibh")
             smtp.Send(correo)
 
-            Enviar_Correo_Con_Attachment_Verificar_Error = True
-
+            Return True
         Catch ex As Exception
-            Enviar_Correo_Con_Attachment_Verificar_Error = False
+            Return False
         End Try
 
 

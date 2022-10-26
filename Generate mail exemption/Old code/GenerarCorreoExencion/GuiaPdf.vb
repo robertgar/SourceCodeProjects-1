@@ -680,7 +680,7 @@ Public Class GuiaPdf
         Celda.Border = Rectangle.NO_BORDER
         TablaEncabezado.AddCell(Celda)
 
-        Obtener_Encabezado_PidoBox = TablaEncabezado
+        Return TablaEncabezado
     End Function
 
     Function Obtener_Titulo_Destino_PidoBox() As PdfPTable
@@ -693,7 +693,7 @@ Public Class GuiaPdf
         TablaTitulos.AddCell(Crear_Celda("Envíado por (Remitente):", Arial10Negrita, Element.ALIGN_LEFT))
         TablaTitulos.AddCell(Crear_Celda("Para (Destinatario):", Arial10Negrita, Element.ALIGN_LEFT))
 
-        Obtener_Titulo_Destino_PidoBox = TablaTitulos
+        Return TablaTitulos
     End Function
 
     Function Obtener_Direccion_Empresa_PidoBox(ByVal EnviadoPor As String) As PdfPTable
@@ -724,8 +724,7 @@ Public Class GuiaPdf
 
         TablaRedondeada1.AddCell(TablaDireccion)
 
-        Obtener_Direccion_Empresa_PidoBox = TablaRedondeada1
-
+        Return TablaRedondeada1
     End Function
 
     Function Obtener_Descripcion_PidoBox(ByVal Descripcion As String, ByVal Peso As Decimal, ByVal Tracking As String) As PdfPTable
@@ -941,49 +940,46 @@ Public Class GuiaPdf
 
         If Len(Tracking) > 60 Then
             MensajeError = "Tracking demasiado largo"
-            Exito = False
-        Else
-            'verifica si existe el tracking ingresado
-            Consulta = "select Count(*)  from Pedido where (CodigoDeRastreo = '" & Tracking & "' or CodigoDeRastreo like '%" & Tracking & "%') and CodigoEstadoPedido <> 4 "
-            If mostrar2.retornarentero(Consulta, MyconString) = 0 Then 'no hay tracking
-                'verifica si el tracking es númerico (puede ser de Fedex)
-                If IsNumeric(Tracking) = False Then
+            Return False
+        End If
+
+        'verifica si existe el tracking ingresado
+        Consulta = "select Count(*)  from Pedido where (CodigoDeRastreo = '" & Tracking & "' or CodigoDeRastreo like '%" & Tracking & "%') and CodigoEstadoPedido <> 4 "
+        If mostrar2.retornarentero(Consulta, MyconString) = 0 Then 'no hay tracking
+            'verifica si el tracking es númerico (puede ser de Fedex)
+            If IsNumeric(Tracking) = False Then
+                MensajeError = "El tracking no existe"
+                Exito = False
+            Else 'toma los últimos 12 dígitos del tracking (por si es de Fedex)
+                TrackingReducido = Microsoft.VisualBasic.Right(Tracking, 12)
+                'verifica si existe el tracking 
+                Consulta = "select Count(*)  from Pedido where (CodigoDeRastreo = '" & TrackingReducido & "' or CodigoDeRastreo like '%" & TrackingReducido & "%')  and CodigoEstadoPedido <> 4 "
+                If mostrar2.retornarentero(Consulta, MyconString) = 0 Then 'no hay tracking
                     MensajeError = "El tracking no existe"
                     Exito = False
-                Else 'toma los últimos 12 dígitos del tracking (por si es de Fedex)
-                    TrackingReducido = Microsoft.VisualBasic.Right(Tracking, 12)
-                    'verifica si existe el tracking 
-                    Consulta = "select Count(*)  from Pedido where (CodigoDeRastreo = '" & TrackingReducido & "' or CodigoDeRastreo like '%" & TrackingReducido & "%')  and CodigoEstadoPedido <> 4 "
-                    If mostrar2.retornarentero(Consulta, MyconString) = 0 Then 'no hay tracking
-                        MensajeError = "El tracking no existe"
-                        Exito = False
-                    Else
-                        'verifica si se encontró más de 1 tracking
-                        Consulta = "select COUNT(*) from (select distinct(CodigoDeRastreo) from Pedido where (CodigoDeRastreo = '" & TrackingReducido & "' or CodigoDeRastreo like '%" & TrackingReducido & "%') and CodigoEstadoPedido <> 4 ) t"
-                        If mostrar2.retornarentero(Consulta, MyconString) > 1 Then
-                            Consulta = "select COUNT(*) from (select distinct(CodigoPaquete) from Pedido where (CodigoDeRastreo = '" & Tracking & "' or CodigoDeRastreo like '%" & Tracking & "%') and CodigoEstadoPedido <> 4 ) t"
-                            If mostrar2.retornarentero(Consulta, MyconString) > 1 Then
-                                MensajeError = "Se encontró más de 1 tracking"
-                                Exito = False
-                            End If
-                        End If
-
-                    End If
-                End If
-
-            Else
-                'verifica si se encontró más de 1 tracking
-                Consulta = "select COUNT(*) from (select distinct(CodigoDeRastreo) from Pedido where (CodigoDeRastreo = '" & Tracking & "' or CodigoDeRastreo like '%" & Tracking & "%') and CodigoEstadoPedido <> 4 ) t"
-                If mostrar2.retornarentero(Consulta, MyconString) > 1 Then
-                    Consulta = "select COUNT(*) from (select distinct(CodigoPaquete) from Pedido where (CodigoDeRastreo = '" & Tracking & "' or CodigoDeRastreo like '%" & Tracking & "%') and CodigoEstadoPedido <> 4 ) t"
+                Else
+                    'verifica si se encontró más de 1 tracking
+                    Consulta = "select COUNT(*) from (select distinct(CodigoDeRastreo) from Pedido where (CodigoDeRastreo = '" & TrackingReducido & "' or CodigoDeRastreo like '%" & TrackingReducido & "%') and CodigoEstadoPedido <> 4 ) t"
                     If mostrar2.retornarentero(Consulta, MyconString) > 1 Then
-                        MensajeError = "Se encontró más de 1 tracking"
-                        Exito = False
+                        Consulta = "select COUNT(*) from (select distinct(CodigoPaquete) from Pedido where (CodigoDeRastreo = '" & Tracking & "' or CodigoDeRastreo like '%" & Tracking & "%') and CodigoEstadoPedido <> 4 ) t"
+                        If mostrar2.retornarentero(Consulta, MyconString) > 1 Then
+                            MensajeError = "Se encontró más de 1 tracking"
+                            Exito = False
+                        End If
                     End If
                 End If
-            End If 'no hay tracking
-
-        End If 'longitud > 40
+            End If
+        Else
+            'verifica si se encontró más de 1 tracking
+            Consulta = "select COUNT(*) from (select distinct(CodigoDeRastreo) from Pedido where (CodigoDeRastreo = '" & Tracking & "' or CodigoDeRastreo like '%" & Tracking & "%') and CodigoEstadoPedido <> 4 ) t"
+            If mostrar2.retornarentero(Consulta, MyconString) > 1 Then
+                Consulta = "select COUNT(*) from (select distinct(CodigoPaquete) from Pedido where (CodigoDeRastreo = '" & Tracking & "' or CodigoDeRastreo like '%" & Tracking & "%') and CodigoEstadoPedido <> 4 ) t"
+                If mostrar2.retornarentero(Consulta, MyconString) > 1 Then
+                    MensajeError = "Se encontró más de 1 tracking"
+                    Exito = False
+                End If
+            End If
+        End If 'no hay tracking
 
         Validar_Tracking = Exito
     End Function

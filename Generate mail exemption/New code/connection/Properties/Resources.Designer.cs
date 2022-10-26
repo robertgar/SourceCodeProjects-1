@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace common.Properties {
+namespace connection.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace common.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("common.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("connection.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,29 +61,20 @@ namespace common.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;table style=&quot;width: 100%; font-size: 14px;&quot;&gt;
+        ///   Looks up a localized string similar to &lt;table style = &quot;width:65%; border-width:1px;  border-style:solid&quot;&gt;
         ///    &lt;tr&gt;
-        ///        &lt;td&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/td&gt;
-        ///        &lt;td align=&quot;center&quot;&gt;
-        ///            @Dress
-        ///        &lt;/td&gt;
-        ///        &lt;td align=&quot;center&quot;&gt;
-        ///            @GuideCode
+        ///        &lt;td&gt;
+        ///            &lt;img src=&quot;https://guatemaladigital.com:3001/images/poster_correo.jpg&quot; alt=&quot;Loading image...&quot; width=&quot;65%&quot;&gt;
+        ///            &lt;img src=&quot;https://guatemaladigital.com:3001/images/CorreoEncabezado.jpg&quot; alt=&quot;Loading image...&quot; width=&quot;65%&quot;&gt;
+        ///            @body
+        ///            &lt;img src=&quot;https://guatemaladigital.com:3001/images/CorreoEncabezado.jpg&quot; alt=&quot;Loading image...&quot; width=&quot;65%&quot;&gt;
         ///        &lt;/td&gt;
         ///    &lt;/tr&gt;
-        ///&lt;/table&gt;
-        ///
-        ///&lt;table style=&quot;padding: 0px; width: 100%; font-weight: bold; font-size: 16px; border-top: 2px black solid; text-align: center;&quot;&gt;
-        ///    &lt;tr&gt;
-        ///        &lt;td&gt;
-        ///            &lt;h5&gt;Sent by (sender):&lt;/h5&gt;
-        ///        &lt;/td&gt;
-        ///        &lt;td&gt;
-        ///      [rest of string was truncated]&quot;;.
+        ///&lt;/table&gt;.
         /// </summary>
-        internal static string TemplateFileMail {
+        internal static string TemplatePrincipalMail {
             get {
-                return ResourceManager.GetString("TemplateFileMail", resourceCulture);
+                return ResourceManager.GetString("TemplatePrincipalMail", resourceCulture);
             }
         }
     }

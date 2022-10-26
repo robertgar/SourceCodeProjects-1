@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Data;
-using System.Reflection.Metadata;
-using System.Net.Security;
-using System.Globalization;
 
 namespace Principal{
     internal class Maker {
         private common.UseCommon use = new common.UseCommon();
         private connection.Execute execute = new connection.Execute();
-        private DataTable tablita = new DataTable();
         private connection.SendEmails email = new connection.SendEmails();
         private connection.Data data = new connection.Data();
         private common.GuidePdf pdf = new common.GuidePdf();
@@ -23,8 +16,6 @@ namespace Principal{
         }
 
         public void makeAll() {
-            if (pdf.createPDFReport("", ref use.query)) { return; }
-            return;
             use.query.Clear();
             use.query.AppendLine(" declare @Temp table(AmazonOrder varchar(50))");
             use.query.AppendLine(" insert into @Temp");
@@ -44,7 +35,7 @@ namespace Principal{
             use.query.AppendLine("            ), 0");
             use.query.AppendLine("        ) = 0");
 
-            use.query.AppendLine(" select");
+            use.query.AppendLine(" select top 5");
             use.query.AppendLine("    pe.OrdenDeAmazon as AmazonOrder,");
             use.query.AppendLine("    isnull(");
             use.query.AppendLine("        sum(");
@@ -56,8 +47,7 @@ namespace Principal{
             use.query.AppendLine("    inner join CuentaDeCompra as cc on cc.Correo = pe.Correo");
             use.query.AppendLine("    inner join @Temp as t on t.AmazonOrder = pe.OrdenDeAmazon");
             use.query.AppendLine(" group by");
-            use.query.AppendLine("    pe.OrdenDeAmazon,");
-            use.query.AppendLine("    pe.CodigoDeRastreo");
+            use.query.AppendLine("    pe.OrdenDeAmazon");
             use.query.AppendLine(" having");
             use.query.AppendLine("    (");
             use.query.AppendLine("        isnull(SUM(iif(pe.CodigoDeRastreo is not null, pe.Impuesto, 0)),0) > 0");
@@ -65,61 +55,136 @@ namespace Principal{
             use.query.AppendLine("    )");
             use.query.AppendLine("    and isnull(sum(iif(cc.NuncaEnviarExencion = 1, 1, 0)), 0) = 0");
             use.query.AppendLine("    and isnull(sum(iif(pe.Cantidad > 0 and pe.CodigoEstadoPedido != 4, 1, 0)), 0) > 0");
-            
+
+            DataTable tabMain = new DataTable();
+
             Console.WriteLine("Filling tab...");
-            execute.fillTable(ref use.query, ref use.tabBuffer);
+            execute.fillTable(ref use.query, ref tabMain);
 
             StringBuilder GuidesList = new StringBuilder();
             StringBuilder attachments = new StringBuilder();
-
-            foreach (DataRow row in use.tabBuffer.Rows) {
-                generateGuide(row);
-                if (!verifyPackage (row["AmazonOrder"].ToString(), ref use.Text, ref GuidesList)) { continue; }
+            DataTable tabBuffer = new DataTable();
+            DataTable tablita = new DataTable();
+            
+            foreach (DataRow row in tabMain.Rows) {
+                generateGuide(row, ref tablita);
+                if (!verifyPackage (row["AmazonOrder"].ToString(), ref use.Text, ref GuidesList, ref tablita)) { continue; }
 
                 use.query.Clear();
-                use.query.AppendLine(" select");
-                use.query.AppendLine("    trim(sp.Value) as SingleGuide,");
-                use.query.AppendLine("    isnUll(t.Counter, 0) as Counter");
+                use.query.AppendLine(" select distinct");
+                use.query.AppendLine("    pa.GuiaAerea,");
+                use.query.AppendLine("    pa.CodigoPaquete,");
+                use.query.AppendLine("    pa.EnviadoPor,");
+                use.query.AppendLine("    pa.Descripcion,");
+                use.query.AppendLine("    iif(isnull(pa.Peso, 0) != 0, convert(varchar, pa.Peso) + ' punds', convert(varchar, pa.Peso)) as Peso,");
+                use.query.AppendLine("    iif(isnull(pa.Peso, 0) != 0, '$' + convert(varchar, pa.Peso * 1.6), 'Null') as Charge,");
+                use.query.AppendLine("    (select sum(p.Cantidad) from Pedido  as p where p.CodigoPaquete = pe.CodigoPaquete) as Parts,");
+                use.query.AppendLine("    pa.CodigoDeRastreo,");
+                use.query.AppendLine("    iif(ISNULL(pe.CodigoImportador,0) > 0, pe.CodigoImportador, isnull(pa.CodigoImportador,0)) CodigoImportador,");
+                use.query.AppendLine("    i.Nombre,");
+                use.query.AppendLine("    convert(varchar, pe.FechaDeEnvio, 103) as FechaEnvio,");
+                use.query.AppendLine("    i.Linea1AWB + iif(isnull(i.Linea2AWB, '') != '', '<br />' + i.Linea2AWB, '') + iif(isnull(i.Linea3AWB, '') != '', '<br />' + i.Linea3AWB, '')as Awb,");
+                use.query.AppendLine("    iif(charindex('NO-Enviar-Exencion', replace(pe.Observaciones, 'ó', 'o')) > 0, 0, 1) as EnviarExencion");
                 use.query.AppendLine(" from");
-                use.query.Append("    string_split('").Append(GuidesList).Append("', ',') as sp");
-                use.query.AppendLine("    left join (");
+                use.query.AppendLine("    Pedido pe");
+                use.query.AppendLine("    inner join Paquete pa on pa.CodigoPaquete = pe.CodigoPaquete");
+                use.query.AppendLine("    inner join Importador i on i.CodigoImportador = pe.CodigoImportador");
+                use.query.AppendLine("    inner join (");
                 use.query.AppendLine("        select");
-                use.query.AppendLine("            pa.GuiaAerea,");
-                use.query.AppendLine("            count(distinct pa.GuiaAerea) as Counter");
+                use.query.AppendLine("            trim(sp.Value) as Guide");
                 use.query.AppendLine("        from");
-                use.query.AppendLine("            Paquete as pa");
-                use.query.AppendLine("            inner join Pedido as pe on pe.CodigoPaquete = pa.CodigoPaquete");
+                use.query.Append("            string_split('").Append(GuidesList).AppendLine("', ',') as sp");
                 use.query.AppendLine("        where");
-                use.query.AppendLine("            pe.CodigoEstadoPedido != 4");
-                use.query.AppendLine("            and pe.Cantidad > 0");
-                use.query.AppendLine("        group by");
-                use.query.AppendLine("            pa.GuiaAerea");
-                use.query.AppendLine("    ) as t on t.GuiaAerea = sp.Value");
+                use.query.AppendLine("            trim(sp.Value) != ''");
+                use.query.AppendLine("    ) as t on t.Guide = pa.GuiaAerea");
                 use.query.AppendLine(" where");
-                use.query.AppendLine("    trim(sp.Value) != ''");
+                use.query.AppendLine("    pe.Cantidad > 0");
+                use.query.AppendLine("    And pe.CodigoEstadoPedido != 4");
 
-                execute.fillTable(ref use.query, ref use.tabBuffer);
-                
-                if (use.tabBuffer.Rows.Count == 0) { continue; }
+                execute.fillTable(ref use.query, ref tablita);
+
+                if (tablita.Rows.Count == 0) { continue; }
 
                 use.Flag = true;
-                foreach (DataRow RowGuide in use.tabBuffer.Rows) {
-                    if (RowGuide["Counter"].ToString().Equals("0")) { continue; }
+                foreach (DataRow RowGuide in tablita.Rows) {
                     if (!use.Flag) { continue; }
 
                     //Create PDF report
-                    use.Flag = pdf.createPDFReport(RowGuide["SingleGuide"].ToString(), ref attachments);
+                    use.Flag = pdf.createPDFReport(RowGuide, ref attachments);
                 }
                 GuidesList.Clear();
 
                 if (!use.Flag) {
                     //Enviar alerta slack
-                    return;
+                    continue;
                 }
+
+                use.query.Clear();
+                use.query.Append(" declare @AmazonOrder varchar(50) = '").Append(row["AmazonOrder"].ToString()).AppendLine("'");
+                use.query.AppendLine(" select");
+                use.query.AppendLine("    pe.Correo,");
+                use.query.AppendLine("    cc.EnviarCopiaExencion,");
+                use.query.AppendLine("    count(distinct pe.CodigoPedido) as Counter");
+                use.query.AppendLine(" from");
+                use.query.AppendLine("    Pedido as pe");
+                use.query.AppendLine("    inner join CuentaDeCompra as cc on cc.Correo = pe.Correo");
+                use.query.AppendLine(" where");
+                use.query.AppendLine("    pe.OrdenDeAmazon = @AmazonOrder");
+                use.query.AppendLine("    and pe.Correo is not null");
+                use.query.AppendLine(" group by");
+                use.query.AppendLine("    pe.Correo,");
+                use.query.AppendLine("    cc.EnviarCopiaExencion");
+
+                execute.fillTable(ref use.query, ref tablita);
+
+                if (tablita.Rows.Count == 0) { continue; }
+
+                foreach (DataRow fila in tablita.Rows) {
+                    if (fila["Counter"].ToString().Equals("0")) { continue; }
+                    if (attachments.Length == 0) { continue; }
+
+                    data.clearAll();
+                    data.subject.Append("Tax exempt for ").Append(fila["Correo"]);
+                    data.body.Append("<br/>Good day, attached proof of export.<br/><br/>E-mail account: ").Append(fila["Correo"]);
+                    data.body.Append("<br/>Order numbers: ").Append(row["AmazonOrder"]);
+                    data.body.Append("<br/><br/><br/>Best Regards,<br/>Mario Porres<br/><br/>");
+                                        
+                    data.origin.Append(fila["Correo"].ToString());
+                    if (data.isSimulation){
+                        data.destination.Append("tec.desarrollo15.gtd@gmail.com");
+                    }else{
+                        data.destination.Append("tax-exempt@amazon.com");
+                    }
+                    
+                    data.attachments.Append(attachments);
+
+                    if (fila["EnviarCopiaExencion"].ToString().Equals("1")) {
+                        if (data.isSimulation){
+                            data.cc.Append("tec.teamoperaciones.gtd@gmail.com");
+                        }else{
+                            data.cc.Append(execute.getParameter(4));
+                        }
+                    }
+                    
+                    if (email.sendEmail()) {
+                        use.query.Clear();
+                        use.query.AppendLine(" Update");
+                        use.query.AppendLine("    OrdenDeCompra");
+                        use.query.AppendLine(" set");
+                        use.query.AppendLine("    CorreoDeExencion = getdate()");
+                        use.query.AppendLine(" where");
+                        use.query.Append("    OrdenDeAmazon = ").Append(row["AmazonOrder"]);
+                        execute.executeQuery(ref use.query, "OrdeDeCompra has been update successfully! Amazon order:" + row["AmazonOrder"].ToString());
+                        continue;
+                    }
+
+                    //Alerta Slack
+                }
+                attachments.Clear();
             }
         }
 
-        private Boolean verifyPackage(String AmazonOrder, ref StringBuilder TaxList, ref StringBuilder GuidesList) {
+        private Boolean verifyPackage(String AmazonOrder, ref StringBuilder TaxList, ref StringBuilder GuidesList, ref DataTable tablita) {
             use.query.Clear();
             use.query.Append("declare @AmazonOrder varchar(30) = '%").Append(AmazonOrder).Append("%'");
             use.query.AppendLine(" select");
@@ -155,15 +220,16 @@ namespace Principal{
             use.query.AppendLine("    pe.CodigoDeRastreo,");
             use.query.AppendLine("    pa.GuiaAerea");
 
-            execute.fillTable(ref use.query, ref use.tabBuffer);
-            if (use.tabBuffer.Rows.Count == 0) { return false; }
+            execute.fillTable(ref use.query, ref tablita);
+
+            if (tablita.Rows.Count == 0) { return false; }
 
             TaxList.Clear();
             int PackageCounter = 0;
             String AirGuide;
             use.query.Clear();
             
-            foreach (DataRow row in use.tabBuffer.Rows) {
+            foreach (DataRow row in tablita.Rows) {
                 if (!row["Tax"].ToString().Equals("0.00")) { TaxList.Append(row["Tax"].ToString()).Append(","); }
                 if (!row["PackageCounter"].ToString().Equals("1")) { continue; }
                 
@@ -210,7 +276,7 @@ namespace Principal{
             return true;
         }
 
-        private void generateGuide(DataRow row) {
+        private void generateGuide(DataRow row, ref DataTable tablita) {
             if (row["ProductsReceived"].ToString().Equals("0")) { return; }
 
             use.query.Clear();
@@ -342,7 +408,7 @@ namespace Principal{
             use.query.AppendLine("    )");
 
             execute.executeQuery(ref use.query, "Order and Sales have been updated successfully! Trackin: " + Tracking);
-            email.sendTrackingEmail(ref Tracking, ref data);
+            email.sendTrackingEmail(ref Tracking, ref data, ref use.tabBuffer);
         }
 
         private String validateTracking(String Tracking) {

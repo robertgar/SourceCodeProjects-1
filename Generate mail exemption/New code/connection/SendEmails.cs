@@ -1,90 +1,96 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using System.Net.Mail;
-using connection;
 using System.Data;
-using common;
+using System.Net;
 
 namespace connection{
     public class Data {
         public Boolean isSimulation;
-        public String? origin;
-        public String? destination;
-        public StringBuilder title = new StringBuilder();
+        public StringBuilder origin = new StringBuilder();
+        public StringBuilder destination = new StringBuilder();
+        public StringBuilder attachments = new StringBuilder();
+        public StringBuilder subject = new StringBuilder();
         public StringBuilder body = new StringBuilder();
-        public StringBuilder buffer = new StringBuilder();
+        public StringBuilder cc = new StringBuilder();
+        public void clearAll(){
+            origin.Clear();
+            destination.Clear();
+            attachments.Clear();
+            subject.Clear();
+            body.Clear();
+            cc.Clear();
+        }
     }
     public class SendEmails {
         private Data? data;
-        private UseCommon? use;
+        private common.UseCommon? use;
         private Execute? execute;
-        public void setSimulation(ref Data data, ref UseCommon use, ref Execute execute) {
+        public void setSimulation(ref Data data, ref common.UseCommon use, ref Execute execute) {
             this.data = data;
             this.use = use;
             this.execute = execute;
         }
 
-        private StringBuilder structure = new StringBuilder();
-        public void sendEmail() {
-            if (data.isSimulation) {
-                Console.WriteLine("Email has been sent successfully!");
-                return;
+        public Boolean sendEmail() {
+            try {
+                trySendEmail();
+                return true;
+            } catch (Exception e) {
+                Console.WriteLine(e);
+                return false;
             }
-
-            if (String.IsNullOrEmpty(data.origin)) {
+        }
+        
+        public void trySendEmail() {
+            if (data.origin.ToString().Trim().Equals("")) {
                 Console.WriteLine("Cannon send mail because Origin is empty.");
                 return;
             }
-            if (String.IsNullOrEmpty(data.destination)) {
+            if (data.destination.ToString().Trim().Equals("")) {
                 Console.WriteLine("Cannot send mail because Destination is empty");
                 return;
             }
-            if (data.title.Length == 0) {
+            if (data.subject.ToString().Trim().Equals("")) {
                 Console.WriteLine("Cannot send mail because Title is empty.");
                 return;
             }
-            if (data.body.Length == 0) {
+            if (data.body.ToString().Trim().Equals("")) {
                 Console.WriteLine("Cannot send mail because Body is empty.");
                 return;
             }
+            if (data.isSimulation){
+                Console.WriteLine("Email has been sent successfully!");
+                //return;
+            }
 
-            data.buffer.Clear();
-            data.buffer.AppendLine("<table style = ccwidth:800px; border-width:1px;  border-style:solidcc>");
-            data.buffer.AppendLine("    <tr>");
-            data.buffer.AppendLine("        <td>");
-            data.buffer.AppendLine("            <img src=cchttps://guatemaladigital.com:3001/images/poster_correo.jpgcc alt=cccargando imagen...cc width=cc800pxcc>");
-            data.buffer.AppendLine("            <img src=cchttps://guatemaladigital.com:3001/images/CorreoEncabezado.jpgcc alt=cccargando imagen...cc width=cc800pxcc>");
-            data.buffer.AppendLine(data.body.ToString());
-            data.buffer.AppendLine("            <img src=cchttps://guatemaladigital.com:3001/images/CorreoEncabezado.jpgcc alt=cccargando imagen...cc width=cc800pxcc>");
-            data.buffer.AppendLine("        </td>");
-            data.buffer.AppendLine("    </tr>");
-            data.buffer.AppendLine("</table>");
+            data.body.Replace(data.body.ToString(), connection.Properties.Resources.TemplatePrincipalMail.ToString().Replace("@body", data.body.ToString()));
 
-            MailMessage Email = new MailMessage();
-            Email.From = new MailAddress(data.origin, "GuatemalaDigital.com");
-            Email.To.Add(data.destination);
-            Email.Subject = data.title.ToString();
-            Email.Body = data.buffer.ToString();
-            Email.IsBodyHtml = true;
-            Email.Priority = MailPriority.Normal;
-            SmtpClient sender = new SmtpClient();
-            sender.EnableSsl = true;
-            sender.UseDefaultCredentials = false;
-            sender.Host = "email-smtp.us-east-1.amazonaws.com";
-            sender.Port = 587;
-            sender.Credentials = new System.Net.NetworkCredential("AKIAZJ6ZLR4S6FRFMBM6", "BP42Ou4Xqtc758pmTKyhFBuRnTZxxx4pOPWO8frYpD8F");
+            using (MailMessage mail = new MailMessage(new MailAddress(data.origin.ToString(), "GuatemalaDigital.com"), new MailAddress(data.destination.ToString()))) {
+                foreach (String cc in data.cc.ToString().Split(",")) {
+                    if (cc.Trim().Equals("")) { continue; }
+                    mail.CC.Add(cc);
+                }
+                foreach (String file in data.attachments.ToString().Split(",")) {
+                    if (file.Trim().Equals("")) { continue; }
+                    mail.Attachments.Add(new Attachment(file));
+                }
 
-            try {
-                sender.Send(Email);
-            } catch (Exception e) {
-                Console.WriteLine(e);
+                mail.Subject = data.subject.ToString();
+                mail.Body = data.body.ToString();
+                mail.IsBodyHtml = true;
+                mail.Priority = MailPriority.Normal;
+                using (SmtpClient sender = new SmtpClient()) {
+                    sender.UseDefaultCredentials = false;
+                    sender.Host = "email-smtp.us-east-1.amazonaws.com";
+                    sender.Port = 587;
+                    sender.EnableSsl = true;
+                    sender.Credentials = new NetworkCredential("AKIAZJ6ZLR4SSIO3C2X6", "BCuKYZn5qkcXIFT5YNSxgVu0uQejzt+w4q8+F6hUIROW");
+                    sender.Send(mail);
+                }
             }
         }
 
-        public void sendTrackingEmail(ref String Tracking, ref Data dat) {
+        public void sendTrackingEmail(ref String Tracking, ref Data dat, ref DataTable table) {
             use.query.AppendLine(" Declare @Sale int = (");
             use.query.AppendLine("    select");
             use.query.AppendLine("        max(pa.CodigoPaquete)");
@@ -143,14 +149,14 @@ namespace connection{
             use.query.AppendLine("    v.CodigoVenta = @Sale");
             use.query.AppendLine("    and v.CodigoEstadoDeVenta = 1");
 
-            execute.fillTable(ref use.query, ref use.tabBuffer);
+            execute.fillTable(ref use.query, ref table);
 
-            if (use.tabBuffer.Rows.Count == 0) { return; }
+            if (table.Rows.Count == 0) { return; }
 
             dataEmail data = new dataEmail();
             data.origin = execute.getParameter(123);
 
-            foreach (DataRow row in use.tabBuffer.Rows) {
+            foreach (DataRow row in table.Rows) {
                 data.destination = row["CorreoCliente"].ToString();
                 data.SaleCode = row["CodigoVenta"].ToString();
 
@@ -221,11 +227,11 @@ namespace connection{
             use.query.AppendLine("            trim(sp.Value) != ''");
             use.query.AppendLine("    ) as dt on dt.DeliveryStatusCode = ee.CodigoEstadoEntrega");
 
-            execute.fillTable(ref use.query, ref use.tabBuffer);
+            execute.fillTable(ref use.query, ref table);
 
-            if (use.tabBuffer.Rows.Count == 0) { return; }
+            if (table.Rows.Count == 0) { return; }
 
-            foreach (DataRow row in use.tabBuffer.Rows) {
+            foreach (DataRow row in table.Rows) {
                 data.status = row["Etapa"].ToString();
             }
 
