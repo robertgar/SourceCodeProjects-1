@@ -1,22 +1,17 @@
 ﻿using iTextSharp.text;
 using iTextSharp.text.pdf;
 using iTextSharp.tool.xml;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.IO.Enumeration;
-using System.Linq;
-using System.Reflection.Metadata;
 using System.Text;
 
 namespace common{
     public class GuidePdf{
-        public Boolean createPDFReport(DataRow Row, ref StringBuilder attachments){
+        public Boolean createPDFReport(DataRow Row, ref StringBuilder attachments, ref String Error){
             try{
                 createPDF(ref Row, ref attachments);
                 return true;
             }catch (Exception e){
-                Console.WriteLine(e);
+                Error = e.ToString();
                 return false;
             }
         }
@@ -63,7 +58,7 @@ namespace common{
             body.Replace("@Tracking", row["CodigoDeRastreo"].ToString());
             body.Replace("@Charge", row["Charge"].ToString());
             
-            using (FileStream stream = new FileStream("C:\\Users\\user\\Desktop\\" + row["CodigoDeRastreo"].ToString() + ".pdf", FileMode.Create)){
+            using (FileStream stream = new FileStream("C:\\Users\\yuno\\Desktop\\" + row["CodigoDeRastreo"].ToString() + ".pdf", FileMode.Create)){
                 iTextSharp.text.Document Pdf = new iTextSharp.text.Document(iTextSharp.text.PageSize.A4, 50, 50, 50, 50);
 
                 PdfWriter writer = PdfWriter.GetInstance(Pdf, stream);
@@ -80,10 +75,10 @@ namespace common{
                 stream.Close();
             }
 
-            if (attachments.ToString().Contains("C:\\Users\\user\\Desktop\\" + row["CodigoDeRastreo"].ToString() + ".pdf")) { return;}
+            if (attachments.ToString().Contains("C:\\Users\\yuno\\Desktop\\" + row["CodigoDeRastreo"].ToString() + ".pdf")) { return;}
             if (attachments.Length > 0) { attachments.Append(","); }
 
-            attachments.Append("C:\\Users\\user\\Desktop\\" + row["CodigoDeRastreo"].ToString() + ".pdf");
+            attachments.Append("C:\\Users\\yuno\\Desktop\\" + row["CodigoDeRastreo"].ToString() + ".pdf");
         }
     }
 }

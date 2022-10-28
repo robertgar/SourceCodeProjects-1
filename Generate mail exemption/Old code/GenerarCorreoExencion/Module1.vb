@@ -204,8 +204,6 @@ Module Module1
                     Return
                 End If
 
-                'Just here
-
                 query.Clear()
                 query.AppendLine(" SELECT")
                 query.AppendLine("   COUNT(1)")

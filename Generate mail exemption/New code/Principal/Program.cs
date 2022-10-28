@@ -1,10 +1,10 @@
 ﻿using Principal;
 
-Console.WriteLine("Inicializando...");
-DateTime ahora = DateTime.Now;
 Boolean deAMentis = true;
+DateTime justNow = DateTime.Now;
 
 Maker make = new Maker(deAMentis);
-make.makeAll();
 
-Console.WriteLine(DateTime.Now - ahora);
+make.Begin(justNow);
+make.makeAll();
+make.End(justNow);

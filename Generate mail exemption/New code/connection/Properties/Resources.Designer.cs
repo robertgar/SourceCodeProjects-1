@@ -61,6 +61,31 @@ namespace connection.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {
+        ///    &quot;text&quot;: &quot;@AlertTitle&quot;,
+        ///    &quot;attachments&quot;: [
+        ///        {
+        ///            &quot;title&quot;: &quot;@Subject&quot;,
+        ///            &quot;fields&quot;: [
+        ///                {
+        ///                    &quot;title&quot;: &quot;&quot;,
+        ///                    &quot;value&quot;: &quot;@Message&quot;,
+        ///                    &quot;Short&quot;: &quot;True&quot;
+        ///                }
+        ///            ],
+        ///            &quot;author_name&quot;: &quot;@ProcedureGuatemalaDigital.com/&quot;,
+        ///            &quot;author_icon&quot;: &quot;https://guatemaladigital.com:3001/images/favicon.ico&quot;
+        ///        }
+        ///    ]
+        ///}.
+        /// </summary>
+        internal static string structureSlack {
+            get {
+                return ResourceManager.GetString("structureSlack", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;table style = &quot;width:65%; border-width:1px;  border-style:solid&quot;&gt;
         ///    &lt;tr&gt;
         ///        &lt;td&gt;

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Data.SqlClient;
 using System.Data;
 using System.Runtime.InteropServices;
+using System.Xml.Serialization;
 
 namespace connection{
     public class Execute{
@@ -22,7 +23,7 @@ namespace connection{
 
             try {
                 return Buffer.Rows[0][0].ToString();
-            }catch (Exception ex) {
+            }catch (Exception) {
                 return Error;
             }
         }
@@ -35,17 +36,15 @@ namespace connection{
                 SqlDataAdapter reader = new SqlDataAdapter(query.ToString(), connector);
                 reader.Fill(Tablita);
                 connector.Close();
-            }
-            catch (Exception e) { }
+            } catch (Exception) { }
         }
 
         public int getNat(ref StringBuilder query, [Optional] int Error){
             try{
-                fillTable(ref query, ref Buffer);
-
-                return int.Parse(Buffer.Rows[0][0].ToString());
-            }
-            catch (Exception e) {
+                DataTable tab = new DataTable();
+                fillTable(ref query, ref tab);
+                return int.Parse(tab.Rows[0][0].ToString());
+            }catch (Exception) {
                 return Error;
             }
         }
@@ -62,7 +61,7 @@ namespace connection{
                 command.CommandType = CommandType.Text;
                 command.ExecuteNonQuery();
                 connector.Close();
-            }catch (Exception e) { }
+            }catch (Exception) { }
         }
 
         public String getParameter(int ParameterCode, [Optional] String error) {
@@ -75,6 +74,20 @@ namespace connection{
             query.Append("    CodigoParametro = ").Append(ParameterCode);
 
             return getValue(ref query, error);
+        }
+
+        public String getChanel(int Chanel) {
+            StringBuilder query = new StringBuilder();
+            query.AppendLine(" select");
+            query.AppendLine("    w.Url");
+            query.AppendLine(" from");
+            query.AppendLine("    Alerta as a");
+            query.AppendLine("    inner join Webhook as w on w.CodigoWebhook = a.CodigoWebhook");
+            query.AppendLine(" where");
+            query.AppendLine("    a.Activo = 1");
+            query.Append("    and a.CodigoAlerta = ").Append(Chanel);
+
+            return getValue(ref query);
         }
     }
 }

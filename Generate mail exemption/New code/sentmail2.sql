@@ -6,7 +6,7 @@ declare @SalesCode int = (
         inner join Pedido as pe on pe.CodigoPedido = vp.CodigoPedido
         inner join Paquete as pa on pa.CodigoPaquete = pe.CodigoPaquete
     where
-        pa.CodigoDeRastreo like '%1Z0638E81316951892%'
+        pa.CodigoDeRastreo like '%TBA164758546704%'
 )
 
 select

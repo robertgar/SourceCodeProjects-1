@@ -326,8 +326,8 @@ Public Class Envio_De_Correos
         If IndiceNit = -1 Then
             Nit = ""
             If IndiceDir = -1 Then
-                DireccionFactura = ""
                 NombreFactura = Factura.Substring(0)
+                DireccionFactura = ""
             Else
                 NombreFactura = Factura.Substring(0, IndiceDir)
                 DireccionFactura = Factura.Substring(IndiceDir + 4)
@@ -338,8 +338,8 @@ Public Class Envio_De_Correos
                 Nit = Factura.Substring(IndiceNit + 4)
             Else
                 NombreFactura = Factura.Substring(0, IndiceNit)
-                Nit = Factura.Substring(IndiceNit + 4, IndiceDir - IndiceNit - 4)
                 DireccionFactura = Factura.Substring(IndiceDir + 4)
+                Nit = Factura.Substring(IndiceNit + 4, IndiceDir - IndiceNit - 4)
             End If
         End If
 
@@ -393,7 +393,7 @@ Public Class Envio_De_Correos
             div_visible = "Visible = 'False'"
             Return
         End If
-
+        'Just here
         cadena = ""
         For Each fila As DataRow In dt_estados_entrega.Rows
             guia = ""

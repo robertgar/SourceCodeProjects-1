@@ -6,16 +6,52 @@ namespace Principal{
         private common.UseCommon use = new common.UseCommon();
         private connection.Execute execute = new connection.Execute();
         private connection.SendEmails email = new connection.SendEmails();
-        private connection.Data data = new connection.Data();
         private common.GuidePdf pdf = new common.GuidePdf();
+        private connection.Slack slack = new connection.Slack();
+        private int CounterGeneral;
 
         public Maker(Boolean DeAMentis) {
-            data.isSimulation = DeAMentis;
+            email.data.isSimulation = DeAMentis;
             execute.setSimulation(ref DeAMentis);
-            email.setSimulation(ref data, ref use, ref execute);
+            email.setSimulation(ref use, ref execute);
+            CounterGeneral = 0;
         }
-
+        public void Begin(DateTime tiempito) {
+            slack.data.Clear();
+            slack.data.alertTitle.Append("Alert");
+            slack.data.subject.Append("Procedure alert info: the process has begun...");
+            slack.data.procedure.Append("Procedure: generate mail exemption");
+            slack.data.chanel.Append(execute.getChanel(11));
+            slack.data.message.Append("The process 'generate mail exemption' has begun.");
+            slack.data.message.Append("\nTime start: ").Append(tiempito);
+            slack.send();
+        }
+        public void End(DateTime Tiempito) {
+            slack.data.Clear();
+            slack.data.alertTitle.Append("Alert");
+            slack.data.subject.Append("Procedure alert info: the process has been completed!");
+            slack.data.procedure.Append("Procedure: generate mail exemption");
+            slack.data.chanel.Append(execute.getChanel(11));
+            slack.data.message.Append("The process 'generate mail exemption' has been completed.");
+            slack.data.message.Append("\nTime execution total: ").Append(DateTime.Now - Tiempito);
+            slack.data.message.Append("\nTotal emails sent: ").Append(CounterGeneral);
+            slack.send();
+        }
         public void makeAll() {
+            try {
+                tryMakeAll();
+            } catch (Exception e) {
+                Console.WriteLine(e);
+                slack.data.Clear();
+                slack.data.alertTitle.Append("Error");
+                slack.data.subject.Append("Procedure alert inf: Ops! Something has gone wrong. :(");
+                slack.data.procedure.Append("Procedure: generate mail exemption");
+                slack.data.chanel.Append(execute.getChanel(11));
+                slack.data.message.Append(e);
+                slack.send();
+            }
+        }
+        private void tryMakeAll() {
             use.query.Clear();
             use.query.AppendLine(" declare @Temp table(AmazonOrder varchar(50))");
             use.query.AppendLine(" insert into @Temp");
@@ -63,9 +99,9 @@ namespace Principal{
 
             StringBuilder GuidesList = new StringBuilder();
             StringBuilder attachments = new StringBuilder();
-            DataTable tabBuffer = new DataTable();
             DataTable tablita = new DataTable();
-            
+            String Error = "";
+
             foreach (DataRow row in tabMain.Rows) {
                 generateGuide(row, ref tablita);
                 if (!verifyPackage (row["AmazonOrder"].ToString(), ref use.Text, ref GuidesList, ref tablita)) { continue; }
@@ -110,15 +146,21 @@ namespace Principal{
                     if (!use.Flag) { continue; }
 
                     //Create PDF report
-                    use.Flag = pdf.createPDFReport(RowGuide, ref attachments);
+                    use.Flag = pdf.createPDFReport(RowGuide, ref attachments, ref Error);
                 }
                 GuidesList.Clear();
 
                 if (!use.Flag) {
-                    //Enviar alerta slack
+                    slack.data.Clear();
+                    slack.data.alertTitle.Append("Error");
+                    slack.data.subject.Append("Error procedure: create PDF report, amazon order: ").Append(row["AmazonOrder"]).Append("");
+                    slack.data.procedure.Append("Procedure: generate mail exemption");
+                    slack.data.chanel.Append(execute.getChanel(11));
+                    slack.data.message.Append(Error);
+                    slack.send();
                     continue;
                 }
-
+                
                 use.query.Clear();
                 use.query.Append(" declare @AmazonOrder varchar(50) = '").Append(row["AmazonOrder"].ToString()).AppendLine("'");
                 use.query.AppendLine(" select");
@@ -141,44 +183,51 @@ namespace Principal{
 
                 foreach (DataRow fila in tablita.Rows) {
                     if (fila["Counter"].ToString().Equals("0")) { continue; }
-                    if (attachments.Length == 0) { continue; }
+                    if (attachments.ToString().Trim().Equals("")) { continue; }
 
-                    data.clearAll();
-                    data.subject.Append("Tax exempt for ").Append(fila["Correo"]);
-                    data.body.Append("<br/>Good day, attached proof of export.<br/><br/>E-mail account: ").Append(fila["Correo"]);
-                    data.body.Append("<br/>Order numbers: ").Append(row["AmazonOrder"]);
-                    data.body.Append("<br/><br/><br/>Best Regards,<br/>Mario Porres<br/><br/>");
-                                        
-                    data.origin.Append(fila["Correo"].ToString());
-                    if (data.isSimulation){
-                        data.destination.Append("tec.desarrollo15.gtd@gmail.com");
+                    email.data.clearAll();
+                    email.data.subject.Append("Tax exempt for ").Append(fila["Correo"]);
+                    email.data.body.Append("<br/>Good day, attached proof of export.<br/><br/>E-mail account: ").Append(fila["Correo"]);
+                    email.data.body.Append("<br/>Order numbers: ").Append(row["AmazonOrder"]);
+                    email.data.body.Append("<br/><br/><br/>Best Regards,<br/>Mario Porres<br/><br/>");
+                    email.data.origin.Append(fila["Correo"].ToString());
+                    email.data.attachments.Append(attachments);
+
+                    if (email.data.isSimulation){
+                        email.data.destination.Append("tec.desarrollo15.gtd@gmail.com");
                     }else{
-                        data.destination.Append("tax-exempt@amazon.com");
+                        email.data.destination.Append("tax-exempt@amazon.com");
                     }
-                    
-                    data.attachments.Append(attachments);
 
                     if (fila["EnviarCopiaExencion"].ToString().Equals("1")) {
-                        if (data.isSimulation){
-                            data.cc.Append("tec.teamoperaciones.gtd@gmail.com");
+                        if (email.data.isSimulation){
+                            email.data.cc.Append("tec.teamoperaciones.gtd@gmail.com");
                         }else{
-                            data.cc.Append(execute.getParameter(4));
+                            email.data.cc.Append(execute.getParameter(4));
                         }
                     }
                     
-                    if (email.sendEmail()) {
-                        use.query.Clear();
-                        use.query.AppendLine(" Update");
-                        use.query.AppendLine("    OrdenDeCompra");
-                        use.query.AppendLine(" set");
-                        use.query.AppendLine("    CorreoDeExencion = getdate()");
-                        use.query.AppendLine(" where");
-                        use.query.Append("    OrdenDeAmazon = ").Append(row["AmazonOrder"]);
-                        execute.executeQuery(ref use.query, "OrdeDeCompra has been update successfully! Amazon order:" + row["AmazonOrder"].ToString());
+                    if (!email.sendEmail(ref Error)) {
+                        slack.data.Clear();
+                        slack.data.alertTitle.Append("Error");
+                        slack.data.subject.Append("Error procedure: error while sending mail, amazon order: ").Append(row["AmazonOrder"]).Append("");
+                        slack.data.procedure.Append("Procedure: generate mail exemption");
+                        slack.data.chanel.Append(execute.getChanel(11));
+                        slack.data.message.Append(Error);
+                        slack.send();
                         continue;
                     }
 
-                    //Alerta Slack
+                    use.query.Clear();
+                    use.query.AppendLine(" Update");
+                    use.query.AppendLine("    OrdenDeCompra");
+                    use.query.AppendLine(" set");
+                    use.query.AppendLine("    CorreoDeExencion = getdate()");
+                    use.query.AppendLine(" where");
+                    use.query.Append("    OrdenDeAmazon = '").Append(row["AmazonOrder"]).Append("'");
+                    execute.executeQuery(ref use.query, "OrdeDeCompra has been update successfully! Amazon order:" + row["AmazonOrder"].ToString());
+
+                    CounterGeneral++;
                 }
                 attachments.Clear();
             }
@@ -267,7 +316,7 @@ namespace Principal{
             use.query.AppendLine("    pe.CodigoDeRastreo is not null");
             use.query.AppendLine("    and pe.CodigoEstadoPedido != 4");
             use.query.AppendLine("    and pe.OrdenDeAmazon like @AmazonOrder");
-
+            
             if (execute.getNat(ref use.query, 0) != PackageCounter) { return false; }
 
             GuidesList.Replace(GuidesList.ToString(), GuidesList.ToString().Substring(0, GuidesList.Length - 1));
@@ -408,7 +457,28 @@ namespace Principal{
             use.query.AppendLine("    )");
 
             execute.executeQuery(ref use.query, "Order and Sales have been updated successfully! Trackin: " + Tracking);
-            email.sendTrackingEmail(ref Tracking, ref data, ref use.tabBuffer);
+            sendTrackingEmail("venta");
+        }
+
+        private void sendTrackingEmail(String SalesCode) {
+            DataTable table = new DataTable();
+
+            use.query.Clear();
+
+            execute.fillTable(ref use.query, ref table);
+            if (table.Rows.Count == 0) { return; }
+
+            foreach (DataRow row in table.Rows) {
+                //Almacena las variables
+            }
+
+            use.query.Clear();
+            execute.fillTable(ref use.query, ref table);
+            if (table.Rows.Count == 0) { return; }
+
+            foreach (DataRow row in table.Rows) {
+
+            }
         }
 
         private String validateTracking(String Tracking) {
