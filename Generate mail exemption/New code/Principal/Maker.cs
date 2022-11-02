@@ -52,6 +52,10 @@ namespace Principal{
             }
         }
         private void tryMakeAll() {
+            String track = "TBA303268801696";
+            email.sendMailTracking(ref track, ref use.query, ref execute);
+            return;
+
             use.query.Clear();
             use.query.AppendLine(" declare @Temp table(AmazonOrder varchar(50))");
             use.query.AppendLine(" insert into @Temp");
@@ -457,28 +461,7 @@ namespace Principal{
             use.query.AppendLine("    )");
 
             execute.executeQuery(ref use.query, "Order and Sales have been updated successfully! Trackin: " + Tracking);
-            sendTrackingEmail("venta");
-        }
-
-        private void sendTrackingEmail(String SalesCode) {
-            DataTable table = new DataTable();
-
-            use.query.Clear();
-
-            execute.fillTable(ref use.query, ref table);
-            if (table.Rows.Count == 0) { return; }
-
-            foreach (DataRow row in table.Rows) {
-                //Almacena las variables
-            }
-
-            use.query.Clear();
-            execute.fillTable(ref use.query, ref table);
-            if (table.Rows.Count == 0) { return; }
-
-            foreach (DataRow row in table.Rows) {
-
-            }
+            email.sendMailTracking(ref Tracking, ref use.query, ref execute);
         }
 
         private String validateTracking(String Tracking) {

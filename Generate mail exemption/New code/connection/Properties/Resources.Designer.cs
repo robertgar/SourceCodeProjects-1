@@ -73,7 +73,7 @@ namespace connection.Properties {
         ///                    &quot;Short&quot;: &quot;True&quot;
         ///                }
         ///            ],
-        ///            &quot;author_name&quot;: &quot;@ProcedureGuatemalaDigital.com/&quot;,
+        ///            &quot;author_name&quot;: &quot;@Procedure&quot;,
         ///            &quot;author_icon&quot;: &quot;https://guatemaladigital.com:3001/images/favicon.ico&quot;
         ///        }
         ///    ]
@@ -82,6 +82,32 @@ namespace connection.Properties {
         internal static string structureSlack {
             get {
                 return ResourceManager.GetString("structureSlack", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;table style=&quot;border: 1px solid black; width: 100%; padding: 5%; font: 12px;&quot;&gt;
+        ///    &lt;tr&gt;
+        ///        &lt;td align=&quot;center&quot;&gt;
+        ///            &lt;h1&gt;
+        ///                Sales code: @SalesCode
+        ///            &lt;/h1&gt;
+        ///        &lt;/td&gt;
+        ///    &lt;/tr&gt;
+        ///    &lt;tr&gt;
+        ///        &lt;td align=&quot;center&quot;&gt;
+        ///            &lt;h3&gt;
+        ///                Your order @SalesCode from GuatemalaDigital, has been sent by the supplier!
+        ///            &lt;/h3&gt;
+        ///        &lt;/td&gt;
+        ///    &lt;/tr&gt;
+        ///    &lt;tr&gt;
+        ///        &lt;td colspan=&quot;2&quot;&gt;
+        ///            &lt;table style=&quot;border: 1px solid black; width: 1 [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string TemplateEmailTracking {
+            get {
+                return ResourceManager.GetString("TemplateEmailTracking", resourceCulture);
             }
         }
         

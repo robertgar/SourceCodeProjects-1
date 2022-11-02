@@ -121,6 +121,9 @@
   <data name="structureSlack" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\structureSlack.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
+  <data name="TemplateEmailTracking" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\TemplateEmailTracking.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
   <data name="TemplatePrincipalMail" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\TemplatePrincipalMail.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
