@@ -2,6 +2,7 @@
 using System.Net.Mail;
 using System.Net;
 using System.Data;
+using iTextSharp.tool.xml.html;
 
 namespace connection{
     public class Data {
@@ -42,7 +43,7 @@ namespace connection{
         
         public void trySendEmail() {
             if (data.origin.ToString().Trim().Equals("")) {
-                Console.WriteLine("Cannon send mail because Origin is empty.");
+                Console.WriteLine("Cannot send mail because Origin is empty.");
                 return;
             }
             if (data.destination.ToString().Trim().Equals("")) {
@@ -132,7 +133,9 @@ namespace connection{
             query.AppendLine("            ''");
             query.AppendLine("        )");
             query.AppendLine("    ) as InvoiceAddress,");
-            query.AppendLine("    pr.Foto as UrlImage");
+            query.AppendLine("    pr.Foto as UrlImage,");
+            query.AppendLine("    replace(ee.Nombre, 'Bodega', 'en bodega') as DeliveryStatus,");
+            query.AppendLine("    concat('https://guatemaladigital.com/Producto/', pr.CodigoProducto) as UrlProduct");
             query.AppendLine(" from");
             query.AppendLine("    VentaPedido as vp");
             query.AppendLine("    inner join Pedido  as pe on pe.CodigoPedido = vp.CodigoPedido");
@@ -146,6 +149,7 @@ namespace connection{
             query.AppendLine("    inner join FormaDePago as fp on fp.CodigoFormaDePago = v.CodigoFormaDePago");
             query.AppendLine("    inner join Factura as f on f.CodigoFactura = v.CodigoFactura");
             query.AppendLine("    inner join Producto as pr on pr.CodigoProducto = v.CodigoProducto");
+            query.AppendLine("    inner join EstadoEntrega as ee on ee.CodigoEstadoEntrega = v.CodigoEstadoEntrega");
             query.AppendLine("    left join Departamento as d on d.CodigoDepartamento = v.CodigoDepartamento");
             query.AppendLine("    left join Municipio as m on m.CodigoMunicipio = v.CodigoMunicipio");
             query.AppendLine("    left join (");
@@ -229,9 +233,41 @@ namespace connection{
                 data.body.Replace("@Status", Status);
                 data.body.Replace("@Product", row["Product"].ToString());
                 data.body.Replace("@Applicant", row["Applicant"].ToString());
-                if (row["Telefonos"].ToString().Contains("-")) {
-                     
+                data.body.Replace("@Mail", row["Mail"].ToString());
+                data.body.Replace("@Date", row["Date"].ToString());
+                Status = row["Telefonos"].ToString();
+                if (Status.Contains("-")) {
+                    data.body.Replace("@Phone", Status.Substring(0, Status.IndexOf("-")));
+                    data.body.Replace("@AlternatePhone", Status.Substring(Status.IndexOf("-")));
                 }
+                if (Status.Contains("||")) {
+                    data.body.Replace("@Phone", Status.Substring(0, Status.IndexOf("||")));
+                    data.body.Replace("@AlternatePhone", Status.Substring(Status.IndexOf("||")));
+                }
+                data.body.Replace("@Phone", Status);
+                data.body.Replace("@AlternatePhone", "");
+                data.body.Replace("@Address", row["Address"].ToString());
+                data.body.Replace("@PaymentMethod", row["PaymentMethod"].ToString());
+                data.body.Replace("@Price", "Q " + row["Price"].ToString());
+                data.body.Replace("@AmountPayable", "Q " + row["AmountPayable"].ToString());
+                data.body.Replace("@Days", row["Days"].ToString());
+                data.body.Replace("@Name", row["Name"].ToString());
+                data.body.Replace("@Nit", row["Nit"].ToString());
+                data.body.Replace("@InvoiceAddress", row["InvoiceAddress"].ToString());
+                data.body.Replace("@UrlImage", row["UrlImage"].ToString());
+                data.body.Replace("@UrlProduct", row["UrlProduct"].ToString());
+
+                data.subject.Append("Your GuatemalaDigital ").Append(row["SalesCode"]);
+                data.subject.Append(" order is ").Append(row["DeliveryStatus"]);
+                data.origin.Append(execute.getParameter(123));
+                
+                if (data.isSimulation) {
+                    data.destination.Append("tec.desarrollo15.gtd@gmail.com");
+                }else{
+                    data.destination.Append(row["Mail"]);
+                }
+
+                sendEmail(ref Status);
             }
         }
     }

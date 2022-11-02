@@ -11,7 +11,7 @@ namespace common{
                 createPDF(ref Row, ref attachments);
                 return true;
             }catch (Exception e){
-                Error = e.ToString();
+                Error = e.ToString().Substring(0, 50);
                 return false;
             }
         }
@@ -58,7 +58,7 @@ namespace common{
             body.Replace("@Tracking", row["CodigoDeRastreo"].ToString());
             body.Replace("@Charge", row["Charge"].ToString());
             
-            using (FileStream stream = new FileStream("C:\\Users\\yuno\\Desktop\\" + row["CodigoDeRastreo"].ToString() + ".pdf", FileMode.Create)){
+            using (FileStream stream = new FileStream("C:\\inetpub\\wwwroot\\Sistema\\CARGA\\" + row["CodigoDeRastreo"].ToString() + ".pdf", FileMode.Create)){
                 iTextSharp.text.Document Pdf = new iTextSharp.text.Document(iTextSharp.text.PageSize.A4, 50, 50, 50, 50);
 
                 PdfWriter writer = PdfWriter.GetInstance(Pdf, stream);
@@ -75,10 +75,10 @@ namespace common{
                 stream.Close();
             }
 
-            if (attachments.ToString().Contains("C:\\Users\\yuno\\Desktop\\" + row["CodigoDeRastreo"].ToString() + ".pdf")) { return;}
+            if (attachments.ToString().Contains("C:\\inetpub\\wwwroot\\Sistema\\CARGA\\" + row["CodigoDeRastreo"].ToString() + ".pdf")) { return;}
             if (attachments.Length > 0) { attachments.Append(","); }
 
-            attachments.Append("C:\\Users\\yuno\\Desktop\\" + row["CodigoDeRastreo"].ToString() + ".pdf");
+            attachments.Append("C:\\inetpub\\wwwroot\\Sistema\\CARGA\\" + row["CodigoDeRastreo"].ToString() + ".pdf");
         }
     }
 }

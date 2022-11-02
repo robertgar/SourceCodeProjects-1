@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using System.Data.SqlClient;
 using System.Data;
 using System.Runtime.InteropServices;
-using System.Xml.Serialization;
 
 namespace connection{
     public class Execute{
@@ -30,20 +25,21 @@ namespace connection{
 
         public void fillTable(ref StringBuilder query, ref DataTable Tablita) {
             Tablita.Clear();
-            
+            Tablita.Rows.Clear();
+            Tablita.Columns.Clear();
+
+            connector.Open();
             try{
-                connector.Open();
                 SqlDataAdapter reader = new SqlDataAdapter(query.ToString(), connector);
                 reader.Fill(Tablita);
-                connector.Close();
-            } catch (Exception) { }
+            } catch (Exception) {}
+            connector.Close();
         }
 
         public int getNat(ref StringBuilder query, [Optional] int Error){
             try{
-                DataTable tab = new DataTable();
-                fillTable(ref query, ref tab);
-                return int.Parse(tab.Rows[0][0].ToString());
+                fillTable(ref query, ref Buffer);
+                return int.Parse(Buffer.Rows[0][0].ToString());
             }catch (Exception) {
                 return Error;
             }
@@ -72,7 +68,7 @@ namespace connection{
             query.AppendLine("    Parametro");
             query.AppendLine(" where");
             query.Append("    CodigoParametro = ").Append(ParameterCode);
-
+            
             return getValue(ref query, error);
         }
 

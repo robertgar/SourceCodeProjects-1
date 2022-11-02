@@ -52,10 +52,6 @@ namespace Principal{
             }
         }
         private void tryMakeAll() {
-            String track = "TBA303268801696";
-            email.sendMailTracking(ref track, ref use.query, ref execute);
-            return;
-
             use.query.Clear();
             use.query.AppendLine(" declare @Temp table(AmazonOrder varchar(50))");
             use.query.AppendLine(" insert into @Temp");
@@ -75,7 +71,7 @@ namespace Principal{
             use.query.AppendLine("            ), 0");
             use.query.AppendLine("        ) = 0");
 
-            use.query.AppendLine(" select top 5");
+            use.query.AppendLine(" select");
             use.query.AppendLine("    pe.OrdenDeAmazon as AmazonOrder,");
             use.query.AppendLine("    isnull(");
             use.query.AppendLine("        sum(");
@@ -100,6 +96,9 @@ namespace Principal{
 
             Console.WriteLine("Filling tab...");
             execute.fillTable(ref use.query, ref tabMain);
+            Console.WriteLine("Sending emails...");
+
+            if (tabMain.Rows.Count == 0) { return; }
 
             StringBuilder GuidesList = new StringBuilder();
             StringBuilder attachments = new StringBuilder();
@@ -239,7 +238,7 @@ namespace Principal{
 
         private Boolean verifyPackage(String AmazonOrder, ref StringBuilder TaxList, ref StringBuilder GuidesList, ref DataTable tablita) {
             use.query.Clear();
-            use.query.Append("declare @AmazonOrder varchar(30) = '%").Append(AmazonOrder).Append("%'");
+            use.query.Append("declare @AmazonOrder varchar(30) = '%").Append(AmazonOrder).AppendLine("%'");
             use.query.AppendLine(" select");
             use.query.AppendLine("    iif(");
             use.query.AppendLine("        charindex('(', pe.CodigoDeRastreo) > 0 and charindex(')', pe.CodigoDeRastreo) > 0,");
@@ -288,7 +287,7 @@ namespace Principal{
                 
                 PackageCounter++;
 
-                AirGuide = row["AirGuide"].ToString();
+                AirGuide = row["AirGuide"].ToString().Trim();
                 if (!AirGuide.Equals("")) {
                     if (!GuidesList.ToString().Contains(AirGuide)){ GuidesList.Append(AirGuide).Append(",");}
                     
@@ -311,7 +310,7 @@ namespace Principal{
             if (!use.query.ToString().Equals("")) { execute.executeQuery(ref use.query, "Package-AirGuide has been updated successfully! Amazon order:" + AmazonOrder); }
 
             use.query.Clear();
-            use.query.Append(" declare @AmazonOrder varchar(30) = '%").Append(AmazonOrder).Append("%'");
+            use.query.Append(" declare @AmazonOrder varchar(30) = '%").Append(AmazonOrder).AppendLine("%'");
             use.query.AppendLine(" select");
             use.query.AppendLine("    count(distinct pe.CodigoDeRastreo) as TotalPedidos");
             use.query.AppendLine(" from");
@@ -333,7 +332,7 @@ namespace Principal{
             if (row["ProductsReceived"].ToString().Equals("0")) { return; }
 
             use.query.Clear();
-            use.query.Append(" declare @AmazonOrder varchar(30) = '%").Append(row["AmazonOrder"]).Append("%'");
+            use.query.Append(" declare @AmazonOrder varchar(30) = '%").Append(row["AmazonOrder"]).AppendLine("%'");
             use.query.AppendLine(" select");
             use.query.AppendLine("    count(distinct pa.CodigoPaquete) as Packages,");
             use.query.AppendLine("    sum(iif(pe.CodigoPaquete is null, 1, 0)) as OrdersNoPackages,");
@@ -367,6 +366,8 @@ namespace Principal{
                         
             execute.fillTable(ref use.query, ref tablita);
 
+            if (tablita.Rows.Count == 0) { return; }
+
             foreach (DataRow fila in tablita.Rows) {
                 if (fila["Packages"].ToString().Equals("0")) {
                     if (fila["Orders"].ToString().Equals("0")) { continue; }
@@ -379,7 +380,7 @@ namespace Principal{
                 if (fila["OrdersNoPackages"].ToString().Equals("0")) { continue; }
 
                 use.query.Clear();
-                use.query.Append(" declare @Tracking varchar(50) = '%").Append(fila["ShortTracking"].ToString()).Append("%'");
+                use.query.Append(" declare @Tracking varchar(50) = '%").Append(fila["ShortTracking"].ToString()).AppendLine("%'");
                 use.query.AppendLine(" update");
                 use.query.AppendLine("    Pedido");
                 use.query.AppendLine(" set");
@@ -394,15 +395,15 @@ namespace Principal{
         }
 
         private void updatePackage(String Tracking) {
-            //Just here
-            if (validateTracking(Tracking).Equals("")) {
+            if (Tracking.Trim().Equals("")) { return; }
+            if (!validateTracking(Tracking).Equals("")) {
                 Console.WriteLine("Tracking: " + Tracking + " doesn't exists or there is more than one record with this tracking.");
                 return;
             }
 
             //Update order
             use.query.Clear();
-            use.query.Append(" declare @Tracking varchar(30) = '").Append(Tracking).Append("'");
+            use.query.Append(" declare @Tracking varchar(30) = '").Append(Tracking).AppendLine("'");
             use.query.AppendLine(" update");
             use.query.AppendLine("    Pedido");
             use.query.AppendLine(" set");
@@ -470,7 +471,7 @@ namespace Principal{
             }
 
             use.query.Clear();
-            use.query.Append(" declare @Tracking varchar(30) = '").Append("'");
+            use.query.Append(" declare @Tracking varchar(30) = '").Append(Tracking).AppendLine("'");
             use.query.AppendLine(" select");
             use.query.AppendLine("    count(1) as TrackingExists");
             use.query.AppendLine(" from");
@@ -496,9 +497,11 @@ namespace Principal{
         }
 
         private void insertPackage(String Tracking, String AmazonOrder) {
+            if (Tracking.Trim().Equals("")) { return; }
+
             use.query.Clear();
-            use.query.Append(" declare @Rastreo varchar(50) = '%").Append(Tracking).Append("%'");
-            use.query.Append(" declare @AmazonOrder varchar(30) = '").Append(AmazonOrder).Append("'");
+            use.query.Append(" declare @Rastreo varchar(50) = '%").Append(Tracking).AppendLine("%'");
+            use.query.Append(" declare @AmazonOrder varchar(30) = '").Append(AmazonOrder).AppendLine("'");
             use.query.AppendLine(" select");
             use.query.AppendLine("    pe.CodigoDeRastreo,");
             use.query.AppendLine("    isnull(max(pe.Vendedor), '') as EnviadoPor,");
@@ -518,9 +521,10 @@ namespace Principal{
             use.query.AppendLine("    pe.CodigoDeRastreo,");
             use.query.AppendLine("    pe.OrdenDeAmazon,");
             use.query.AppendLine("    pr.CodigoEstablecimiento");
+            DataTable table = new DataTable();
+            execute.fillTable(ref use.query, ref table);
 
-            execute.fillTable(ref use.query, ref use.tabBuffer);
-
+            if (table.Rows.Count == 0) { return; }
             use.query.Clear();
             foreach (DataRow row in use.tabBuffer.Rows) {
                 use.query.AppendLine(" insert into");

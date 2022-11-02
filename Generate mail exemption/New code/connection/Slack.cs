@@ -29,14 +29,15 @@ namespace connection{
 
             data.subject.Append("\nServer: ").Append(Environment.MachineName);
 
-            data.message.Replace(data.message.ToString(), Properties.Resources.structureSlack.ToString().Replace("@Message", data.message.ToString()));
+            data.message.Replace(data.message.ToString(), Properties.Resources.structureSlack.ToString().Replace("@Message", data.message.ToString().Replace(((char)34).ToString(), "'")));
             data.message.Replace("@Subject", data.subject.ToString());
             data.message.Replace("@AlertTitle", data.alertTitle.ToString());
             data.message.Replace("@Procedure", data.procedure.ToString());
             
             try{
                 trySend();
-            }catch(Exception e) {
+            }
+            catch(Exception e) {
                 Console.WriteLine(e);
             }
         }

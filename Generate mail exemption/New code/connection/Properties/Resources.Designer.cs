@@ -86,7 +86,7 @@ namespace connection.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;table style=&quot;border: 1px solid black; width: 100%; padding: 5%; font: 12px;&quot;&gt;
+        ///   Looks up a localized string similar to &lt;table style=&quot;width: 100%; padding: 5%; font: 12px;&quot;&gt;
         ///    &lt;tr&gt;
         ///        &lt;td align=&quot;center&quot;&gt;
         ///            &lt;h1&gt;
@@ -103,7 +103,8 @@ namespace connection.Properties {
         ///    &lt;/tr&gt;
         ///    &lt;tr&gt;
         ///        &lt;td colspan=&quot;2&quot;&gt;
-        ///            &lt;table style=&quot;border: 1px solid black; width: 1 [rest of string was truncated]&quot;;.
+        ///            &lt;table style=&quot;border-bottom: 1px solid black; width: 100%;&quot;&gt;
+        ///           [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string TemplateEmailTracking {
             get {
@@ -112,13 +113,13 @@ namespace connection.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;table style = &quot;width:65%; border-width:1px;  border-style:solid&quot;&gt;
+        ///   Looks up a localized string similar to &lt;table style = &quot;width:100%; border-width:1px;  border-style:solid&quot;&gt;
         ///    &lt;tr&gt;
         ///        &lt;td&gt;
-        ///            &lt;img src=&quot;https://guatemaladigital.com:3001/images/poster_correo.jpg&quot; alt=&quot;Loading image...&quot; width=&quot;65%&quot;&gt;
-        ///            &lt;img src=&quot;https://guatemaladigital.com:3001/images/CorreoEncabezado.jpg&quot; alt=&quot;Loading image...&quot; width=&quot;65%&quot;&gt;
+        ///            &lt;img src=&quot;https://guatemaladigital.com:3001/images/poster_correo.jpg&quot; alt=&quot;Loading image...&quot; width=&quot;100%&quot;&gt;
+        ///            &lt;img src=&quot;https://guatemaladigital.com:3001/images/CorreoEncabezado.jpg&quot; alt=&quot;Loading image...&quot; width=&quot;100%&quot;&gt;
         ///            @body
-        ///            &lt;img src=&quot;https://guatemaladigital.com:3001/images/CorreoEncabezado.jpg&quot; alt=&quot;Loading image...&quot; width=&quot;65%&quot;&gt;
+        ///            &lt;img src=&quot;https://guatemaladigital.com:3001/images/CorreoEncabezado.jpg&quot; alt=&quot;Loading image...&quot; width=&quot;100%&quot;&gt;
         ///        &lt;/td&gt;
         ///    &lt;/tr&gt;
         ///&lt;/table&gt;.
