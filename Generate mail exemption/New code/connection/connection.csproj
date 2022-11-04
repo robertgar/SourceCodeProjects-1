@@ -9,7 +9,7 @@
   <ItemGroup>
 	  <ProjectReference Include="..\common\common.csproj" />
 	  <PackageReference Include="Microsoft.DependencyValidation.Analyzers" Version="0.11.0" />
-	  <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
+	  <PackageReference Include="System.Data.SqlClient" Version="4.8.4" />
   </ItemGroup>
 
   <ItemGroup>

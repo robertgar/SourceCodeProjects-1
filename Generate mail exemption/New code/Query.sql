@@ -15,8 +15,7 @@
                 iif(p.Cantidad > 0 and p.CodigoEstadoPedido in (1, 2, 6), 1, 0)
             ), 0
         ) = 0
-        
-        
+
  select
     pe.OrdenDeAmazon as AmazonOrder,
     isnull(
