@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Principal", "Principal.csproj", "{112C5C8A-47E8-4696-BD9E-AE96F7D926A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Principal", "Principal.csproj", "{112C5C8A-47E8-4696-BD9E-AE96F7D926A9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "common", "..\common\common.csproj", "{D4531563-EA88-475F-89BE-3626E415CAE9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "common", "..\common\common.csproj", "{D4531563-EA88-475F-89BE-3626E415CAE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "connection", "..\connection\connection.csproj", "{A2755061-21E3-4FF6-97D2-97AD1BFABCF5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "connection", "..\connection\connection.csproj", "{A2755061-21E3-4FF6-97D2-97AD1BFABCF5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "wsGD", "..\..\..\..\servicioexterno\wsGD\wsGD.csproj", "{21A7E6CF-96B6-4AA2-BD19-02EBB76C1398}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{A2755061-21E3-4FF6-97D2-97AD1BFABCF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2755061-21E3-4FF6-97D2-97AD1BFABCF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2755061-21E3-4FF6-97D2-97AD1BFABCF5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21A7E6CF-96B6-4AA2-BD19-02EBB76C1398}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21A7E6CF-96B6-4AA2-BD19-02EBB76C1398}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21A7E6CF-96B6-4AA2-BD19-02EBB76C1398}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21A7E6CF-96B6-4AA2-BD19-02EBB76C1398}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

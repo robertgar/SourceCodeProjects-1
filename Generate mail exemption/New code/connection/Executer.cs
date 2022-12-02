@@ -71,19 +71,5 @@ namespace connection {
 
             return getValue(ref query, error);
         }
-
-        public String getChanel(int Chanel) {
-            StringBuilder query = new StringBuilder();
-            query.AppendLine(" select");
-            query.AppendLine("    w.Url");
-            query.AppendLine(" from");
-            query.AppendLine("    Alerta as a");
-            query.AppendLine("    inner join Webhook as w on w.CodigoWebhook = a.CodigoWebhook");
-            query.AppendLine(" where");
-            query.AppendLine("    a.Activo = 1");
-            query.Append("    and a.CodigoAlerta = ").Append(Chanel);
-
-            return getValue(ref query);
-        }
     }
 }

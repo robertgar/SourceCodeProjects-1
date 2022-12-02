@@ -11,7 +11,7 @@ namespace common {
                 createPDF(ref Row, ref attachments);
                 return true;
             } catch (Exception e) {
-                Error = e.ToString().Substring(0, 50);
+                Error = e.ToString();
                 return false;
             }
         }
