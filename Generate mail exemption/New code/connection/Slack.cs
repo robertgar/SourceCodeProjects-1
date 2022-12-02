@@ -8,7 +8,6 @@ namespace connection {
             public StringBuilder subject = new StringBuilder();
             public StringBuilder alertTitle = new StringBuilder();
             public StringBuilder message = new StringBuilder();
-            public StringBuilder procedure = new StringBuilder();
             public string warningColour = "";
             public typeAlertColor selectColour = new typeAlertColor();
             
@@ -16,7 +15,6 @@ namespace connection {
                 subject.Clear();
                 alertTitle.Clear();
                 message.Clear();
-                procedure.Clear();
                 warningColour = "";
             }
 
@@ -33,7 +31,6 @@ namespace connection {
             if (data.subject.ToString().Trim().Equals("")) { return; }
             if (data.alertTitle.ToString().Trim().Equals("")) { return; }
             if (data.message.ToString().Trim().Equals("")) { return; }
-            if (data.procedure.ToString().Trim().Equals("")) { return; }
             if (data.warningColour.Equals("")) { data.warningColour = data.selectColour.Blue; }
 
             try {

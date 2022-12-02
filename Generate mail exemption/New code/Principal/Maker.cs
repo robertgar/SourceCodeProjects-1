@@ -21,7 +21,6 @@ namespace Principal {
             slack.data.Clear();
             slack.data.alertTitle.Append("Alert");
             slack.data.subject.Append("Procedure alert info: the process has begun...");
-            slack.data.procedure.Append("Procedure: generate mail exemption");
             slack.data.message.Append("The process 'generate mail exemption' has begun.");
             slack.data.message.Append("\nTime start: ").Append(tiempito);
             slack.data.warningColour = slack.data.selectColour.Green;
@@ -34,7 +33,6 @@ namespace Principal {
                 slack.data.Clear();
                 slack.data.alertTitle.Append("Error");
                 slack.data.subject.Append("Procedure alert inf: Ops! Something has gone wrong. :(");
-                slack.data.procedure.Append("Procedure: generate mail exemption");
                 slack.data.message.Append(e);
                 slack.send();
             }
@@ -42,7 +40,6 @@ namespace Principal {
             slack.data.Clear();
             slack.data.alertTitle.Append("Alert");
             slack.data.subject.Append("Procedure alert info: the process has been completed!");
-            slack.data.procedure.Append("Procedure: generate mail exemption");
             slack.data.message.Append("The process 'generate mail exemption' has been completed.");
             slack.data.message.Append("\nTime execution total: ").Append(DateTime.Now - tiempito);
             slack.data.message.Append("\nTotal emails sent: ").Append(CounterGeneral);
@@ -155,7 +152,6 @@ namespace Principal {
                     slack.data.Clear();
                     slack.data.alertTitle.Append("Error");
                     slack.data.subject.Append("Error procedure: create PDF report, amazon order: ").Append(row["AmazonOrder"]).Append("");
-                    slack.data.procedure.Append("Procedure: generate mail exemption");
                     slack.data.message.Append(Error);
                     slack.data.warningColour = slack.data.selectColour.Red;
                     slack.send();
@@ -212,7 +208,6 @@ namespace Principal {
                         slack.data.Clear();
                         slack.data.alertTitle.Append("Error");
                         slack.data.subject.Append("Error procedure: error while sending mail, amazon order: ").Append(row["AmazonOrder"]).Append("");
-                        slack.data.procedure.Append("Procedure: generate mail exemption");
                         slack.data.message.Append(Error);
                         slack.data.warningColour = slack.data.selectColour.Red;
                         slack.send();
