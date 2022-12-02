@@ -61,25 +61,28 @@ namespace common.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;table style=&quot;width: 100%; font-size: 14px;&quot;&gt;
-        ///    &lt;tr&gt;
-        ///        &lt;td&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/td&gt;
-        ///        &lt;td align=&quot;center&quot;&gt;
-        ///            @Dress
-        ///        &lt;/td&gt;
-        ///        &lt;td align=&quot;center&quot;&gt;
-        ///            @GuideCode
-        ///        &lt;/td&gt;
-        ///    &lt;/tr&gt;
-        ///&lt;/table&gt;
-        ///
-        ///&lt;table style=&quot;padding: 0px; width: 100%; font-weight: bold; font-size: 16px; border-top: 2px black solid; text-align: center;&quot;&gt;
-        ///    &lt;tr&gt;
-        ///        &lt;td&gt;
-        ///            &lt;h5&gt;Sent by (sender):&lt;/h5&gt;
-        ///        &lt;/td&gt;
-        ///        &lt;td&gt;
-        ///      [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to &lt;!DOCTYPE html&gt;
+        ///&lt;html lang=&quot;en&quot;&gt;
+        ///&lt;head&gt;
+        ///    &lt;title&gt;Template&lt;/title&gt;
+        ///    &lt;style&gt;
+        ///        .tablita{
+        ///            width: 100%;
+        ///            font-size: 14px;
+        ///        }
+        ///        .tabData{
+        ///            width: 100%;
+        ///            border: 4px solid black;
+        ///            font-size: 14px;
+        ///            padding: 5px;
+        ///            border-radius: 10px;
+        ///        }
+        ///        .header{
+        ///            padding: 0px;
+        ///            width: 100%;
+        ///            font-weight: bold;
+        ///            font-size: 16px;
+        ///            border-top: [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string TemplateFileMail {
             get {

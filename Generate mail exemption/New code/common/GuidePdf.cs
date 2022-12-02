@@ -4,19 +4,19 @@ using iTextSharp.tool.xml;
 using System.Data;
 using System.Text;
 
-namespace common{
-    public class GuidePdf{
-        public Boolean createPDFReport(DataRow Row, ref StringBuilder attachments, ref String Error){
-            try{
+namespace common {
+    public class GuidePdf {
+        public Boolean createPDFReport(DataRow Row, ref StringBuilder attachments, ref String Error) {
+            try {
                 createPDF(ref Row, ref attachments);
                 return true;
-            }catch (Exception e){
+            } catch (Exception e) {
                 Error = e.ToString().Substring(0, 50);
                 return false;
             }
         }
 
-        private void createPDF(ref DataRow row, ref StringBuilder attachments){
+        private void createPDF(ref DataRow row, ref StringBuilder attachments) {
             iTextSharp.text.Image img = iTextSharp.text.Image.GetInstance("http://yocargo.com/wp-content/uploads/2019/12/LogoYoCargo.jpg");
             StringBuilder body = new StringBuilder();
             body.Append(Properties.Resources.TemplateFileMail.ToString());
@@ -41,7 +41,7 @@ namespace common{
                     body.Replace("@GuideCode", "Guide<br />" + row["GuiaAerea"].ToString());
                     break;
             }
-            
+
             img.ScaleToFit(200, 100);
             img.SetAbsolutePosition(10, 760);
 
@@ -57,8 +57,8 @@ namespace common{
             body.Replace("@Weigth", row["Peso"].ToString());
             body.Replace("@Tracking", row["CodigoDeRastreo"].ToString());
             body.Replace("@Charge", row["Charge"].ToString());
-            
-            using (FileStream stream = new FileStream("C:\\inetpub\\wwwroot\\Sistema\\CARGA\\" + row["CodigoDeRastreo"].ToString() + ".pdf", FileMode.Create)){
+
+            using (FileStream stream = new FileStream("C:\\inetpub\\wwwroot\\Sistema\\CARGA\\" + row["CodigoDeRastreo"].ToString() + ".pdf", FileMode.Create)) {
                 iTextSharp.text.Document Pdf = new iTextSharp.text.Document(iTextSharp.text.PageSize.A4, 50, 50, 50, 50);
 
                 PdfWriter writer = PdfWriter.GetInstance(Pdf, stream);
@@ -67,7 +67,7 @@ namespace common{
                 Pdf.Add(new Phrase(""));
                 Pdf.Add(img);
 
-                using (StringReader sr = new StringReader(body.ToString())){
+                using (StringReader sr = new StringReader(body.ToString())) {
                     XMLWorkerHelper.GetInstance().ParseXHtml(writer, Pdf, sr);
                 }
 
@@ -75,7 +75,7 @@ namespace common{
                 stream.Close();
             }
 
-            if (attachments.ToString().Contains("C:\\inetpub\\wwwroot\\Sistema\\CARGA\\" + row["CodigoDeRastreo"].ToString() + ".pdf")) { return;}
+            if (attachments.ToString().Contains("C:\\inetpub\\wwwroot\\Sistema\\CARGA\\" + row["CodigoDeRastreo"].ToString() + ".pdf")) { return; }
             if (attachments.Length > 0) { attachments.Append(","); }
 
             attachments.Append("C:\\inetpub\\wwwroot\\Sistema\\CARGA\\" + row["CodigoDeRastreo"].ToString() + ".pdf");

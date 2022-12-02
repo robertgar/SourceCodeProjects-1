@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Text;
 
-namespace connection{
+namespace connection {
     public class Slack {
         public Data data = new Data();
         public class Data {
@@ -19,7 +19,7 @@ namespace connection{
                 procedure.Clear();
             }
         }
-        
+
         public void send() {
             if (data.subject.ToString().Trim().Equals("")) { return; }
             if (data.chanel.ToString().Trim().Equals("")) { return; }
@@ -33,11 +33,10 @@ namespace connection{
             data.message.Replace("@Subject", data.subject.ToString());
             data.message.Replace("@AlertTitle", data.alertTitle.ToString());
             data.message.Replace("@Procedure", data.procedure.ToString());
-            
-            try{
+
+            try {
                 trySend();
-            }
-            catch(Exception e) {
+            } catch (Exception e) {
                 Console.WriteLine(e);
             }
         }

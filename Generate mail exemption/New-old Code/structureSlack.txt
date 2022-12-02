@@ -1,0 +1,17 @@
+{
+    "text": "@AlertTitle",
+    "attachments": [
+        {
+            "title": "@Subject",
+            "fields": [
+                {
+                    "title": "",
+                    "value": "@Message",
+                    "Short": "True"
+                }
+            ],
+            "author_name": "@ProcedureGuatemalaDigital.com/",
+            "author_icon": "https://guatemaladigital.com:3001/images/favicon.ico"
+        }
+    ]
+}

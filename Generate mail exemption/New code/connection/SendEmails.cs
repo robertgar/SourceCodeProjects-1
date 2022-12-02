@@ -2,9 +2,8 @@
 using System.Net.Mail;
 using System.Net;
 using System.Data;
-using iTextSharp.tool.xml.html;
 
-namespace connection{
+namespace connection {
     public class Data {
         public Boolean isSimulation;
         public StringBuilder origin = new StringBuilder();
@@ -13,7 +12,7 @@ namespace connection{
         public StringBuilder subject = new StringBuilder();
         public StringBuilder body = new StringBuilder();
         public StringBuilder cc = new StringBuilder();
-        public void clearAll(){
+        public void clearAll() {
             origin.Clear();
             destination.Clear();
             attachments.Clear();
@@ -40,7 +39,7 @@ namespace connection{
                 return false;
             }
         }
-        
+
         public void trySendEmail() {
             if (data.origin.ToString().Trim().Equals("")) {
                 Console.WriteLine("Cannot send mail because Origin is empty.");
@@ -260,10 +259,10 @@ namespace connection{
                 data.subject.Append("Your GuatemalaDigital ").Append(row["SalesCode"]);
                 data.subject.Append(" order is ").Append(row["DeliveryStatus"]);
                 data.origin.Append(execute.getParameter(123));
-                
+
                 if (data.isSimulation) {
                     data.destination.Append("tec.desarrollo15.gtd@gmail.com");
-                }else{
+                } else {
                     data.destination.Append(row["Mail"]);
                 }
 

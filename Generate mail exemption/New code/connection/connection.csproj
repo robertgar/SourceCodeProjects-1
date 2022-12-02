@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -7,9 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-	  <ProjectReference Include="..\common\common.csproj" />
-	  <PackageReference Include="Microsoft.DependencyValidation.Analyzers" Version="0.11.0" />
-	  <PackageReference Include="System.Data.SqlClient" Version="4.8.4" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\servicioexterno\wsGD\wsGD.csproj" />
+    <ProjectReference Include="..\common\common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

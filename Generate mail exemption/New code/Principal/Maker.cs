@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Data;
 
-namespace Principal{
+namespace Principal {
     internal class Maker {
         private common.UseCommon use = new common.UseCommon();
         private connection.Execute execute = new connection.Execute();
@@ -16,7 +16,8 @@ namespace Principal{
             email.setSimulation(ref use, ref execute);
             CounterGeneral = 0;
         }
-        public void Begin(DateTime tiempito) {
+        
+        public void makeAll(DateTime tiempito) {
             slack.data.Clear();
             slack.data.alertTitle.Append("Alert");
             slack.data.subject.Append("Procedure alert info: the process has begun...");
@@ -25,21 +26,9 @@ namespace Principal{
             slack.data.message.Append("The process 'generate mail exemption' has begun.");
             slack.data.message.Append("\nTime start: ").Append(tiempito);
             slack.send();
-        }
-        public void End(DateTime Tiempito) {
-            slack.data.Clear();
-            slack.data.alertTitle.Append("Alert");
-            slack.data.subject.Append("Procedure alert info: the process has been completed!");
-            slack.data.procedure.Append("Procedure: generate mail exemption");
-            slack.data.chanel.Append(execute.getChanel(11));
-            slack.data.message.Append("The process 'generate mail exemption' has been completed.");
-            slack.data.message.Append("\nTime execution total: ").Append(DateTime.Now - Tiempito);
-            slack.data.message.Append("\nTotal emails sent: ").Append(CounterGeneral);
-            slack.send();
-        }
-        public void makeAll() {
+
             try {
-                tryMakeAll();
+                //tryMakeAll();
             } catch (Exception e) {
                 Console.WriteLine(e);
                 slack.data.Clear();
@@ -50,6 +39,16 @@ namespace Principal{
                 slack.data.message.Append(e);
                 slack.send();
             }
+
+            slack.data.Clear();
+            slack.data.alertTitle.Append("Alert");
+            slack.data.subject.Append("Procedure alert info: the process has been completed!");
+            slack.data.procedure.Append("Procedure: generate mail exemption");
+            slack.data.chanel.Append(execute.getChanel(11));
+            slack.data.message.Append("The process 'generate mail exemption' has been completed.");
+            slack.data.message.Append("\nTime execution total: ").Append(DateTime.Now - tiempito);
+            slack.data.message.Append("\nTotal emails sent: ").Append(CounterGeneral);
+            slack.send();
         }
         private void tryMakeAll() {
             use.query.Clear();
@@ -107,7 +106,7 @@ namespace Principal{
 
             foreach (DataRow row in tabMain.Rows) {
                 generateGuide(row, ref tablita);
-                if (!verifyPackage (row["AmazonOrder"].ToString(), ref use.Text, ref GuidesList, ref tablita)) { continue; }
+                if (!verifyPackage(row["AmazonOrder"].ToString(), ref use.Text, ref GuidesList, ref tablita)) { continue; }
 
                 use.query.Clear();
                 use.query.AppendLine(" select distinct");
@@ -163,7 +162,7 @@ namespace Principal{
                     slack.send();
                     continue;
                 }
-                
+
                 use.query.Clear();
                 use.query.Append(" declare @AmazonOrder varchar(50) = '").Append(row["AmazonOrder"].ToString()).AppendLine("'");
                 use.query.AppendLine(" select");
@@ -196,20 +195,20 @@ namespace Principal{
                     email.data.origin.Append(fila["Correo"].ToString());
                     email.data.attachments.Append(attachments);
 
-                    if (email.data.isSimulation){
+                    if (email.data.isSimulation) {
                         email.data.destination.Append("tec.desarrollo15.gtd@gmail.com");
-                    }else{
+                    } else {
                         email.data.destination.Append("tax-exempt@amazon.com");
                     }
 
                     if (fila["EnviarCopiaExencion"].ToString().Equals("1")) {
-                        if (email.data.isSimulation){
+                        if (email.data.isSimulation) {
                             email.data.cc.Append("tec.teamoperaciones.gtd@gmail.com");
-                        }else{
+                        } else {
                             email.data.cc.Append(execute.getParameter(4));
                         }
                     }
-                    
+
                     if (!email.sendEmail(ref Error)) {
                         slack.data.Clear();
                         slack.data.alertTitle.Append("Error");
@@ -280,17 +279,17 @@ namespace Principal{
             int PackageCounter = 0;
             String AirGuide;
             use.query.Clear();
-            
+
             foreach (DataRow row in tablita.Rows) {
                 if (!row["Tax"].ToString().Equals("0.00")) { TaxList.Append(row["Tax"].ToString()).Append(","); }
                 if (!row["PackageCounter"].ToString().Equals("1")) { continue; }
-                
+
                 PackageCounter++;
 
                 AirGuide = row["AirGuide"].ToString().Trim();
                 if (!AirGuide.Equals("")) {
-                    if (!GuidesList.ToString().Contains(AirGuide)){ GuidesList.Append(AirGuide).Append(",");}
-                    
+                    if (!GuidesList.ToString().Contains(AirGuide)) { GuidesList.Append(AirGuide).Append(","); }
+
                     continue;
                 }
 
@@ -303,7 +302,7 @@ namespace Principal{
                 use.query.AppendLine("    Generado = 1");
                 use.query.AppendLine(" where");
                 use.query.Append("    CodigoDeRastreo like '%").Append(row["ShortTracking"].ToString()).Append("%'");
-                
+
                 if (!GuidesList.ToString().Contains(AirGuide)) { GuidesList.Append(AirGuide).Append(","); }
             }
 
@@ -319,7 +318,7 @@ namespace Principal{
             use.query.AppendLine("    pe.CodigoDeRastreo is not null");
             use.query.AppendLine("    and pe.CodigoEstadoPedido != 4");
             use.query.AppendLine("    and pe.OrdenDeAmazon like @AmazonOrder");
-            
+
             if (execute.getNat(ref use.query, 0) != PackageCounter) { return false; }
 
             GuidesList.Replace(GuidesList.ToString(), GuidesList.ToString().Substring(0, GuidesList.Length - 1));
@@ -363,7 +362,7 @@ namespace Principal{
             use.query.AppendLine(" group by");
             use.query.AppendLine("    pe.CodigoDeRastreo,");
             use.query.AppendLine("    pa.CodigoPaquete");
-                        
+
             execute.fillTable(ref use.query, ref tablita);
 
             if (tablita.Rows.Count == 0) { return; }

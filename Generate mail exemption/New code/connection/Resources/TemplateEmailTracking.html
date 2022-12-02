@@ -1,4 +1,4 @@
-<table style="width: 100%; padding: 5%; font: 12px;">
+<table style="border: 1px solid black; width: 100%; padding: 5%; font: 12px;">
     <tr>
         <td align="center">
             <h1>
@@ -15,12 +15,12 @@
     </tr>
     <tr>
         <td colspan="2">
-            <table style="border-bottom: 1px solid black; width: 100%;">
+            <table style="border: 1px solid black; width: 100%;">
                 <tr>
                     <td style="border: 1px solid black;">
                         <table style="width: 100%;">
                             <tr>
-                                <td colspan="@V1" align="center"><h3>@Status</h3></td>
+                                <td colspan="@V1" align="center"><h>@Status</h></td>
                             </tr>
                             <tr>
                                 @ContentStatus
@@ -32,43 +32,43 @@
                     <td>
                         <table style="width: 100%;">
                             <tr>
-                                <td align="right" style="width: 20%;"><font color="green">Order:</font></td>
-                                <td style="width: 30%;">@SalesCode</td>
-                                <td align="right" style="width: 20%;"><font color="green">Date:</font></td>
+                                <td align="right" style="width: 20%;">Order:</td>
+                                <td style="width: 30;">@Order</td>
+                                <td align="right" style="width: 20%;">Date</td>
                                 <td style="width: 30%;">@Date</td>
                             </tr>
                             <tr>
-                                <td align="right" style="width: 20%;"><font color="green">Product:</font></td>
+                                <td align="right" style="width: 20%;">Product:</td>
                                 <td colspan="3">@Product</td>
                             </tr>
                             <tr>
-                                <td align="right" style="width: 20%;"><font color="green">Applicant:</font></td>
+                                <td align="right" style="width: 20%;">Applicant:</td>
                                 <td style="width: 30%;">@Applicant</td>
-                                <td align="right" style="width: 20%;"><font color="green">E-mail:</font></td>
+                                <td align="right" style="width: 20%;">E-mail:</td>
                                 <td style="width: 30%;">@Mail</td>
                             </tr>
                             <tr>
-                                <td align="right" style="width: 20%;"><font color="green">Phone:</font></td>
+                                <td align="right" style="width: 20%;">Phone:</td>
                                 <td style="width: 30%;">@Phone</td>
-                                <td align="right" style="width: 20%;"><font color="green">Alternate phone:</font></td>
+                                <td align="right" style="width: 20%;">Alternate phone:</td>
                                 <td style="width: 30%;">@AlternatePhone</td>
                             </tr>
                             <tr>
-                                <td align="right" style="width: 20%;"><font color="green">Address:</font></td>
+                                <td align="right" style="width: 20%;">Delivery address:</td>
                                 <td colspan="3" style="width: 80%;">@Address</td>
                             </tr>
                             <tr>
-                                <td align="right" style="width: 20%;"><font color="green">Payment method:</font></td>
+                                <td align="right" style="width: 20%;">Payment method:</td>
                                 <td style="width: 30%;">@PaymentMethod</td>
-                                <td align="right" style="width: 20%;"><font color="green">Price:</font></td>
+                                <td align="right" style="width: 20%;">Price:</td>
                                 <td style="width: 30%;">@Price</td>
                             </tr>
                             <tr>
-                                <td align="right" style="width: 70%;" colspan="3"><font color="green">Amount payable:</font></td>
+                                <td align="right" style="width: 70%;" colspan="3">Amount payable</td>
                                 <td style="width: 30%;">@AmountPayable</td>
                             </tr>
                             <tr>
-                                <td align="center" colspan="4"><font color="orange">The product will be delivered @Days working days after the order is confirmed.</font></td>
+                                <td align="center" colspan="4">The product will be delivered @Days working days after the order is confirmed.</td>
                             </tr>
                             <tr><td colspan="4">&nbsp;</td></tr>
                             <tr>
@@ -86,9 +86,7 @@
                             </tr>
                             <tr>
                                 <td colspan="4" align="center">
-                                    <a href="@UrlProduct">
-                                        <img src="@UrlImage" width="200px" height="200px" />
-                                    </a>
+                                    <img src="@UrlImage" width="200px" height="200px"/>
                                 </td>
                             </tr>
                         </table>

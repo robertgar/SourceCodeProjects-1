@@ -3,8 +3,8 @@ using System.Data.SqlClient;
 using System.Data;
 using System.Runtime.InteropServices;
 
-namespace connection{
-    public class Execute{
+namespace connection {
+    public class Execute {
         private SqlConnection connector = new ConnectToSQL().getStringConnection();
         private DataTable Buffer = new DataTable();
         private Boolean isSimulation;
@@ -13,12 +13,12 @@ namespace connection{
             this.isSimulation = deAMentis;
         }
 
-        public String getValue(ref StringBuilder query, [Optional] String Error){
+        public String getValue(ref StringBuilder query, [Optional] String Error) {
             fillTable(ref query, ref Buffer);
 
             try {
                 return Buffer.Rows[0][0].ToString();
-            }catch (Exception) {
+            } catch (Exception) {
                 return Error;
             }
         }
@@ -29,18 +29,18 @@ namespace connection{
             Tablita.Columns.Clear();
 
             connector.Open();
-            try{
+            try {
                 SqlDataAdapter reader = new SqlDataAdapter(query.ToString(), connector);
                 reader.Fill(Tablita);
-            } catch (Exception) {}
+            } catch (Exception) { }
             connector.Close();
         }
 
-        public int getNat(ref StringBuilder query, [Optional] int Error){
-            try{
+        public int getNat(ref StringBuilder query, [Optional] int Error) {
+            try {
                 fillTable(ref query, ref Buffer);
                 return int.Parse(Buffer.Rows[0][0].ToString());
-            }catch (Exception) {
+            } catch (Exception) {
                 return Error;
             }
         }
@@ -57,7 +57,7 @@ namespace connection{
                 command.CommandType = CommandType.Text;
                 command.ExecuteNonQuery();
                 connector.Close();
-            }catch (Exception) { }
+            } catch (Exception) { }
         }
 
         public String getParameter(int ParameterCode, [Optional] String error) {
@@ -68,7 +68,7 @@ namespace connection{
             query.AppendLine("    Parametro");
             query.AppendLine(" where");
             query.Append("    CodigoParametro = ").Append(ParameterCode);
-            
+
             return getValue(ref query, error);
         }
 

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Template</title>
+    <style>
+        .tablita{
+            width: 100%;
+            font-size: 14px;
+        }
+        .tabData{
+            width: 100%;
+            border: 4px solid black;
+            font-size: 14px;
+            padding: 5px;
+            border-radius: 10px;
+        }
+        .header{
+            padding: 0px;
+            width: 100%;
+            font-weight: bold;
+            font-size: 16px;
+            border-top: 2px black solid;
+            text-align: center;
+        }
+        .tabList{
+            padding-top: 20px;
+            width: 50%;
+            font-size: 14px;
+        }
+        img{
+            width: 200px;
+            height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <table class="tablita">
+        <tr>
+            <td>
+                <img src=@SrcImage />
+            </td>
+            <td align="center">
+                3750 NW 28 Street Unit
+                <br/>101, Miami Florida, 33142
+                <br/>Phone (305) 634-2757
+            </td>
+            <td align="center">
+                @GuideCode
+            </td>
+        </tr>
+    </table>
+    <table class="header">
+        <tr>
+            <td>
+                <h5>Enviado por (remitente):</h5>
+            </td>
+            <td>
+                 <h5>Para (destinatario):</h5>
+            </td>
+        </tr>
+    </table>
+    <table class="tabData">
+        <tr>
+            <td>
+                <table class="tablita">
+                    <tr>
+                        <td align="right">Nombre remitente o compañía:</td>
+                        <td>@CompanyName</td>
+                    </tr>
+                    <tr>
+                        <td align="right">Dirección:</td>
+                        <td>USA</td>
+                    </tr>
+                    <tr>
+                        <td align="right">Teléfono:</td>
+                        <td>@PhoneCompany</td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table class="tablita">
+                    <tr>
+                        <td align="right">Nombre:</td>
+                        <td>Guatemala Digital S.A.</td>
+                    </tr>
+                    <tr>
+                        <td align="right">Dirección de entrega:</td>
+                        <td>Ciudad, Guatemala city Guatemala</td>
+                    </tr>
+                    <tr>
+                        <td align="right">Nit:</td>
+                        <td>8316715-3</td>
+                    </tr>
+                    <tr>
+                        <td align="right">País:</td>
+                        <td>Guatemala</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    <table class="tabList">
+        <tr>
+            <td align="right">Fecha:</td>
+            <td>@Date</td>
+        </tr>
+        <tr>
+            <td align="right">Origen:</td>
+            <td>@Origin</td>
+        </tr>
+        <tr>
+            <td align="right">Vuelo número:</td>
+            <td>@AirNumber</td>
+        </tr>
+        <tr>
+            <td align="right">Destino:</td>
+            <td>@Destination</td>
+        </tr>
+        <tr>
+            <td align="right">Descripción de contenido:</td>
+            <td>@Description</td>
+        </tr>
+        <tr>
+            <td align="right">Piezas:</td>
+            <td>@Counter</td>
+        </tr>
+        <tr>
+            <td align="right">Peso:</td>
+            <td>@Weigth</td>
+        </tr>
+        <tr>
+            <td align="right">Tracking:</td>
+            <td>@Tracking</td>
+        </tr>
+        <tr>
+            <td align="right">CargaL</td>
+            <td>@Charge</td>
+        </tr>
+    </table>
+</body>
+</html>

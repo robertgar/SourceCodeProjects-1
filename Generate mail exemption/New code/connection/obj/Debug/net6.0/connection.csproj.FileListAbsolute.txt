@@ -1,49 +1,34 @@
-C:\Users\User\Desktop\Generate mail exemption\connection\bin\Debug\net6.0\connection.deps.json
-C:\Users\User\Desktop\Generate mail exemption\connection\bin\Debug\net6.0\connection.dll
-C:\Users\User\Desktop\Generate mail exemption\connection\bin\Debug\net6.0\connection.pdb
-C:\Users\User\Desktop\Generate mail exemption\connection\bin\Debug\net6.0\common.dll
-C:\Users\User\Desktop\Generate mail exemption\connection\bin\Debug\net6.0\common.pdb
-C:\Users\User\Desktop\Generate mail exemption\connection\obj\Debug\net6.0\connection.csproj.AssemblyReference.cache
-C:\Users\User\Desktop\Generate mail exemption\connection\obj\Debug\net6.0\connection.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\User\Desktop\Generate mail exemption\connection\obj\Debug\net6.0\connection.AssemblyInfoInputs.cache
-C:\Users\User\Desktop\Generate mail exemption\connection\obj\Debug\net6.0\connection.AssemblyInfo.cs
-C:\Users\User\Desktop\Generate mail exemption\connection\obj\Debug\net6.0\connection.csproj.CoreCompileInputs.cache
-C:\Users\User\Desktop\Generate mail exemption\connection\obj\Debug\net6.0\connection.csproj.CopyComplete
-C:\Users\User\Desktop\Generate mail exemption\connection\obj\Debug\net6.0\connection.dll
-C:\Users\User\Desktop\Generate mail exemption\connection\obj\Debug\net6.0\refint\connection.dll
-C:\Users\User\Desktop\Generate mail exemption\connection\obj\Debug\net6.0\connection.pdb
-C:\Users\User\Desktop\Generate mail exemption\connection\obj\Debug\net6.0\ref\connection.dll
-C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\bin\Debug\net6.0\connection.deps.json
-C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\bin\Debug\net6.0\connection.dll
-C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\bin\Debug\net6.0\connection.pdb
-C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\bin\Debug\net6.0\common.dll
-C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\bin\Debug\net6.0\common.pdb
-C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.csproj.AssemblyReference.cache
-C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.AssemblyInfoInputs.cache
-C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.AssemblyInfo.cs
-C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.csproj.CoreCompileInputs.cache
-C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.csproj.CopyComplete
-C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.dll
-C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\refint\connection.dll
-C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.pdb
-C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\ref\connection.dll
-C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.Properties.Resources.resources
-C:\Users\User\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.csproj.GenerateResource.cache
-C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\bin\Debug\net6.0\connection.deps.json
-C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\bin\Debug\net6.0\connection.dll
-C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\bin\Debug\net6.0\connection.pdb
-C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\bin\Debug\net6.0\common.dll
-C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\bin\Debug\net6.0\common.pdb
-C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.csproj.AssemblyReference.cache
-C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.Properties.Resources.resources
-C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.csproj.GenerateResource.cache
-C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.AssemblyInfoInputs.cache
-C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.AssemblyInfo.cs
-C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.csproj.CoreCompileInputs.cache
-C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.csproj.CopyComplete
-C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.dll
-C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\refint\connection.dll
-C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.pdb
-C:\Users\yuno\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\ref\connection.dll
+C:\Users\DESKTOP-VDL7R2C\Downloads\connection\bin\Debug\net6.0\connection.deps.json
+C:\Users\DESKTOP-VDL7R2C\Downloads\connection\bin\Debug\net6.0\connection.dll
+C:\Users\DESKTOP-VDL7R2C\Downloads\connection\bin\Debug\net6.0\connection.pdb
+C:\Users\DESKTOP-VDL7R2C\Downloads\connection\bin\Debug\net6.0\common.dll
+C:\Users\DESKTOP-VDL7R2C\Downloads\connection\bin\Debug\net6.0\common.pdb
+C:\Users\DESKTOP-VDL7R2C\Downloads\connection\obj\Debug\net6.0\connection.csproj.AssemblyReference.cache
+C:\Users\DESKTOP-VDL7R2C\Downloads\connection\obj\Debug\net6.0\connection.Properties.Resources.resources
+C:\Users\DESKTOP-VDL7R2C\Downloads\connection\obj\Debug\net6.0\connection.csproj.GenerateResource.cache
+C:\Users\DESKTOP-VDL7R2C\Downloads\connection\obj\Debug\net6.0\connection.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\DESKTOP-VDL7R2C\Downloads\connection\obj\Debug\net6.0\connection.AssemblyInfoInputs.cache
+C:\Users\DESKTOP-VDL7R2C\Downloads\connection\obj\Debug\net6.0\connection.AssemblyInfo.cs
+C:\Users\DESKTOP-VDL7R2C\Downloads\connection\obj\Debug\net6.0\connection.csproj.CoreCompileInputs.cache
+C:\Users\DESKTOP-VDL7R2C\Downloads\connection\obj\Debug\net6.0\connection.csproj.CopyComplete
+C:\Users\DESKTOP-VDL7R2C\Downloads\connection\obj\Debug\net6.0\connection.dll
+C:\Users\DESKTOP-VDL7R2C\Downloads\connection\obj\Debug\net6.0\refint\connection.dll
+C:\Users\DESKTOP-VDL7R2C\Downloads\connection\obj\Debug\net6.0\connection.pdb
+C:\Users\DESKTOP-VDL7R2C\Downloads\connection\obj\Debug\net6.0\ref\connection.dll
+C:\Users\DESKTOP-VDL7R2C\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\bin\Debug\net6.0\connection.deps.json
+C:\Users\DESKTOP-VDL7R2C\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\bin\Debug\net6.0\connection.dll
+C:\Users\DESKTOP-VDL7R2C\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\bin\Debug\net6.0\connection.pdb
+C:\Users\DESKTOP-VDL7R2C\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\bin\Debug\net6.0\common.dll
+C:\Users\DESKTOP-VDL7R2C\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\bin\Debug\net6.0\common.pdb
+C:\Users\DESKTOP-VDL7R2C\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.csproj.AssemblyReference.cache
+C:\Users\DESKTOP-VDL7R2C\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.Properties.Resources.resources
+C:\Users\DESKTOP-VDL7R2C\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.csproj.GenerateResource.cache
+C:\Users\DESKTOP-VDL7R2C\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\DESKTOP-VDL7R2C\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.AssemblyInfoInputs.cache
+C:\Users\DESKTOP-VDL7R2C\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.AssemblyInfo.cs
+C:\Users\DESKTOP-VDL7R2C\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.csproj.CoreCompileInputs.cache
+C:\Users\DESKTOP-VDL7R2C\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.csproj.CopyComplete
+C:\Users\DESKTOP-VDL7R2C\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.dll
+C:\Users\DESKTOP-VDL7R2C\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\refint\connection.dll
+C:\Users\DESKTOP-VDL7R2C\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\connection.pdb
+C:\Users\DESKTOP-VDL7R2C\Documents\GitHub\SourceCodeProjects\Generate mail exemption\New code\connection\obj\Debug\net6.0\ref\connection.dll
