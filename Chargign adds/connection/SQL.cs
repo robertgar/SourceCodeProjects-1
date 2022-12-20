@@ -29,7 +29,7 @@ namespace connection {
             connection.Close();
         }
 
-        public String getValue(ref StringBuilder query, [Optional] String Error) {
+        public String getValue(ref StringBuilder query, [Optional] string Error) {
             fillTable(ref query, ref _buffer);
 
             try {
@@ -39,18 +39,14 @@ namespace connection {
             }
         }
 
-        public String getChanel(int Chanel) {
-            _query.Clear();
-            _query.AppendLine(" select");
-            _query.AppendLine("    w.Url");
-            _query.AppendLine(" from");
-            _query.AppendLine("    Alerta as a");
-            _query.AppendLine("    inner join Webhook as w on w.CodigoWebhook = a.CodigoWebhook");
-            _query.AppendLine(" where");
-            _query.AppendLine("    a.Activo = 1");
-            _query.Append("    and a.CodigoAlerta = ").Append(Chanel);
+        public int getNat(ref StringBuilder query, [Optional] int Error) {
+            fillTable(ref query, ref _buffer);
 
-            return getValue(ref _query);
+            try {
+                return int.Parse(_buffer.Rows[0][0].ToString());
+            } catch (Exception) {
+                return Error;
+            }
         }
     }
 }

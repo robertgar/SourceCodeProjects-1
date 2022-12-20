@@ -29,12 +29,7 @@ namespace Principal {
             try {
                 tryMakeAll();
             } catch (Exception e) {
-                Console.WriteLine(e);
-                slack.data.Clear();
-                slack.data.alertTitle.Append("Error");
-                slack.data.subject.Append("Procedure alert inf: Ops! Something has gone wrong. :(");
-                slack.data.message.Append(e);
-                slack.send();
+                slack.sendError(e.Message);
             }
 
             slack.data.Clear();
@@ -149,12 +144,7 @@ namespace Principal {
                 GuidesList.Clear();
 
                 if (!use.Flag) {
-                    slack.data.Clear();
-                    slack.data.alertTitle.Append("Error");
-                    slack.data.subject.Append("Error procedure: create PDF report, amazon order: ").Append(row["AmazonOrder"]).Append("");
-                    slack.data.message.Append(Error);
-                    slack.data.warningColour = slack.data.selectColour.Red;
-                    slack.send();
+                    slack.sendError(Error);
                     continue;
                 }
 
@@ -205,12 +195,7 @@ namespace Principal {
                     }
 
                     if (!email.sendEmail(ref Error)) {
-                        slack.data.Clear();
-                        slack.data.alertTitle.Append("Error");
-                        slack.data.subject.Append("Error procedure: error while sending mail, amazon order: ").Append(row["AmazonOrder"]).Append("");
-                        slack.data.message.Append(Error);
-                        slack.data.warningColour = slack.data.selectColour.Red;
-                        slack.send();
+                        slack.sendError(Error);
                         continue;
                     }
 

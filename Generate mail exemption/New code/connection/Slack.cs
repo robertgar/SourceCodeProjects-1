@@ -26,6 +26,15 @@ namespace connection {
                 public typeAlertColor() {}
             }
         }
+
+        public void sendError(string Error) {
+            data.Clear();
+            data.alertTitle.Append("Error alert");
+            data.subject.Append("Procedure alert inf: Ops! Something has gone wrong. :(");
+            data.warningColour = data.selectColour.Red;
+            data.message.Append(Error.Replace(((char)34).ToString(), "'"));
+            send();
+        }
         
         public void send() {
             if (data.subject.ToString().Trim().Equals("")) { return; }

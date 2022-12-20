@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\servicioexterno\wsGD\wsGD.csproj" />
     <ProjectReference Include="..\common\common.csproj" />
   </ItemGroup>
 
