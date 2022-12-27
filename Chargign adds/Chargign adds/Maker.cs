@@ -1,4 +1,11 @@
 ﻿using System.Data;
+using Newtonsoft.Json;
+using RestSharp;
+using RestSharp.Serializers.NewtonsoftJson;
+using System;
+using System.Text;
+using System.IO;
+using System.Security.Cryptography;
 
 namespace Principal {
     internal class Maker {
@@ -12,12 +19,12 @@ namespace Principal {
             DateTime _now = DateTime.Now;
             int[] assessedCharges = { 0, 0, 0};
             
-            js.slack.data.Clear();
-            js.slack.data.alertTitle.Append("Alert");
-            js.slack.data.subject.Append("Procedure alert info: the process has begun...");
-            js.slack.data.message.Append("Start time: ").Append(_now);
-            js.slack.data.warningColour = js.slack.data.getColour.Green;
-            js.slack.send();
+            //js.slack.data.Clear();
+            //js.slack.data.alertTitle.Append("Alert");
+            //js.slack.data.subject.Append("Procedure alert info: the process has begun...");
+            //js.slack.data.message.Append("Start time: ").Append(_now);
+            //js.slack.data.warningColour = js.slack.data.getColour.Green;
+            //js.slack.send();
 
             try {
                 TryMake(ref js, ref assessedCharges);
@@ -116,6 +123,7 @@ namespace Principal {
 
             if (tabPrincipal.Rows.Count == 0) { return; }
             int Invoice = 0;
+            String numerotarheta;
 
             foreach (DataRow row in tabPrincipal.Rows) {
                 switch (int.Parse(row["Charging"].ToString())) {
@@ -127,6 +135,21 @@ namespace Principal {
                         assessedCharges[1]++;
                         //Create invoice
                         Invoice = getNewInvoice(row["CustomerCode"].ToString(), ref js);
+                        js.use.query.Clear();
+                        js.use.query.Append("Select CodigoVenta,NumeroTarjeta, CodigoSeguridad,VencimientoTarjeta,TotalVenta from Venta where CodigoFactura=").AppendLine(Invoice.ToString());
+                        DataTable tableDatosT = new DataTable();
+                        js.execute.fillTable(ref js.use.query, ref tableDatosT);
+                        foreach (DataRow row1 in tabPrincipal.Rows)
+                        {
+
+                                row["CodigoSeguridad"].ToString();
+                                 row["VencimientoTarjeta"].ToString();
+                                 row["TotalVenta"].ToString();
+                            numerotarheta = getNumerotarjeta(row["NumeroTarjeta"].ToString());
+
+                        }
+
+                          
 
                         //Hacer cobro
                         //Facturar y enviar factura
@@ -389,5 +412,18 @@ namespace Principal {
 
             return js.execute.getNat(ref js.use.query, -1);
         }
+
+
+        private string getNumerotarjeta(string tarjeta)
+        {
+            Byte[] IV = ASCIIEncoding.ASCII.GetBytes("8 @GD b!");
+            Byte[] EncryptionKey = Convert.FromBase64String("MTIzNDU2Nzg5MDEyMzQ1000000000000");
+            Byte[] buffer = Convert.FromBase64String(tarjeta);
+            TripleDESCryptoServiceProvider tdes = new TripleDESCryptoServiceProvider();
+            tdes.Key = EncryptionKey;
+            tdes.IV = IV;
+            return Encoding.UTF8.GetString(tdes.CreateDecryptor().TransformFinalBlock(buffer, 0, buffer.Length));
+        }
+
     }
 }
