@@ -18,13 +18,13 @@ namespace Principal {
             Vars js = new Vars();
             DateTime _now = DateTime.Now;
             int[] assessedCharges = { 0, 0, 0};
-            
-            //js.slack.data.Clear();
-            //js.slack.data.alertTitle.Append("Alert");
-            //js.slack.data.subject.Append("Procedure alert info: the process has begun...");
-            //js.slack.data.message.Append("Start time: ").Append(_now);
-            //js.slack.data.warningColour = js.slack.data.getColour.Green;
-            //js.slack.send();
+
+            js.slack.data.Clear();
+            js.slack.data.alertTitle.Append("Alert");
+            js.slack.data.subject.Append("Procedure alert info: the process has begun...");
+            js.slack.data.message.Append("Start time: ").Append(_now);
+            js.slack.data.warningColour = js.slack.data.getColour.Green;
+            js.slack.send();
 
             try {
                 TryMake(ref js, ref assessedCharges);
@@ -77,7 +77,7 @@ namespace Principal {
             js.use.query.AppendLine("    )");
             js.use.query.AppendLine(")");
 
-            js.use.query.AppendLine("select");
+            js.use.query.AppendLine("select top 1");
             js.use.query.AppendLine("    cli.CodigoCliente as CustomerCode,");
             js.use.query.AppendLine("    case");
             js.use.query.AppendLine("        when");
@@ -135,8 +135,8 @@ namespace Principal {
                         break;
                     case 0:
                         //Create invoice
-                        //Invoice = getNewInvoice(row["CustomerCode"].ToString(), ref js);
-                        Invoice = 590715;
+                        Invoice = getNewInvoice(row["CustomerCode"].ToString(), ref js);
+                        //Invoice = 590715;
                          js.use.query.Clear();
                         js.use.query.Append("Select CodigoVenta,NumeroTarjeta, CodigoSeguridad,VencimientoTarjeta,TotalVenta from Venta where CodigoFactura=").AppendLine(Invoice.ToString());
                         DataTable tableDatosT = new DataTable();
