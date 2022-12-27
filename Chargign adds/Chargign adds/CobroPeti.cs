@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
-public static class CrobroPeti
+public static class CobroPeti
 {
    public static async Task<PagoTarjeta?> AutoCredomaticAsync(EnvioData data)
     {

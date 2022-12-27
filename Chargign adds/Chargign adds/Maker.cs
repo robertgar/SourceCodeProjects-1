@@ -145,13 +145,28 @@ namespace Principal {
                         foreach (DataRow row1 in tableDatosT.Rows)
                         {
 
-                                //row1["CodigoSeguridad"].ToString();
-                                // row1["TotalVenta"].ToString();
                             mes= row1["VencimientoTarjeta"].ToString().Substring(0, 2);
                             anio = row1["VencimientoTarjeta"].ToString().Substring(2, 4);
                             numerotarheta = getNumerotarjeta(row1["NumeroTarjeta"].ToString());
-                            
+                            var datos = new EnvioData(
+                                row1["TotalVenta"].ToString(),
+                                numerotarheta,
+                                mes, 
+                                anio, 
+                                row1["CodigoSeguridad"].ToString(),
+                                Invoice.ToString()
+                                );
+                            var Rpeticio = new PagoTarjeta();
+                            Rpeticio = CobroPeti.AutoCredomatic(datos);
+                            if (Rpeticio.Code==100)
+                            {
 
+
+                            }
+                            else
+                            {
+
+                            }
 
                         }
 
