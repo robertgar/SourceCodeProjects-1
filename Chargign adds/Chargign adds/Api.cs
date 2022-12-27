@@ -18,7 +18,7 @@ public class BackendApi
 
     public BackendApi()
     {
-        var options = new RestClientOptions(https://guatemaladigital.org:86/);
+        var options = new RestClientOptions("https://guatemaladigital.org:86/");
         Client = new RestClient(options);
         Client.UseNewtonsoftJson();
     }
@@ -35,7 +35,7 @@ public class WebApi
 
     public WebApi()
     {
-        var options = new RestClientOptions(https://guatemaladigital.org:86/);
+        var options = new RestClientOptions("https://guatemaladigital.org:86/");
         Client = new RestClient(options);
         Client.UseNewtonsoftJson();
     }

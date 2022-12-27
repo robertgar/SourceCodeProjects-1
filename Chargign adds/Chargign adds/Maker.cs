@@ -124,6 +124,8 @@ namespace Principal {
             if (tabPrincipal.Rows.Count == 0) { return; }
             int Invoice = 0;
             String numerotarheta;
+            String anio;
+            String mes;
 
             foreach (DataRow row in tabPrincipal.Rows) {
                 switch (int.Parse(row["Charging"].ToString())) {
@@ -134,18 +136,22 @@ namespace Principal {
                     case 0:
                         assessedCharges[1]++;
                         //Create invoice
-                        Invoice = getNewInvoice(row["CustomerCode"].ToString(), ref js);
-                        js.use.query.Clear();
+                        //Invoice = getNewInvoice(row["CustomerCode"].ToString(), ref js);
+                        Invoice = 590715;
+                         js.use.query.Clear();
                         js.use.query.Append("Select CodigoVenta,NumeroTarjeta, CodigoSeguridad,VencimientoTarjeta,TotalVenta from Venta where CodigoFactura=").AppendLine(Invoice.ToString());
                         DataTable tableDatosT = new DataTable();
                         js.execute.fillTable(ref js.use.query, ref tableDatosT);
-                        foreach (DataRow row1 in tabPrincipal.Rows)
+                        foreach (DataRow row1 in tableDatosT.Rows)
                         {
 
-                                row["CodigoSeguridad"].ToString();
-                                 row["VencimientoTarjeta"].ToString();
-                                 row["TotalVenta"].ToString();
-                            numerotarheta = getNumerotarjeta(row["NumeroTarjeta"].ToString());
+                                //row1["CodigoSeguridad"].ToString();
+                                // row1["TotalVenta"].ToString();
+                            mes= row1["VencimientoTarjeta"].ToString().Substring(0, 2);
+                            anio = row1["VencimientoTarjeta"].ToString().Substring(2, 4);
+                            numerotarheta = getNumerotarjeta(row1["NumeroTarjeta"].ToString());
+                            
+
 
                         }
 

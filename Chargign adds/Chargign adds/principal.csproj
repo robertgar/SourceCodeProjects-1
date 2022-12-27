@@ -9,14 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Api.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Api.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="108.0.3" />
   </ItemGroup>
 
