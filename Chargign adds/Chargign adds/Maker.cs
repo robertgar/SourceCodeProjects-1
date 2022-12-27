@@ -134,7 +134,6 @@ namespace Principal {
                         assessedCharges[0]++;
                         break;
                     case 0:
-                        assessedCharges[1]++;
                         //Create invoice
                         //Invoice = getNewInvoice(row["CustomerCode"].ToString(), ref js);
                         Invoice = 590715;
@@ -144,7 +143,6 @@ namespace Principal {
                         js.execute.fillTable(ref js.use.query, ref tableDatosT);
                         foreach (DataRow row1 in tableDatosT.Rows)
                         {
-
                             mes= row1["VencimientoTarjeta"].ToString().Substring(0, 2);
                             anio = row1["VencimientoTarjeta"].ToString().Substring(2, 4);
                             numerotarheta = getNumerotarjeta(row1["NumeroTarjeta"].ToString());
@@ -160,18 +158,23 @@ namespace Principal {
                             Rpeticio = CobroPeti.AutoCredomatic(datos);
                             if (Rpeticio.Code==100)
                             {
-
-
+                                var service = new wsGD.ServiceSoapClient();
+                                String vCae = "";
+                                 vCae = service.fuFacturar(Invoice.ToString(),"", true);
+                                if (vCae.Contains("Error"))
+                                {
+                                    assessedCharges[1]++;
+                                }
+                                else
+                                {
+                                    assessedCharges[0]++;
+                                }
                             }
                             else
                             {
-
+                                assessedCharges[1]++;
                             }
-
                         }
-
-                          
-
                         //Hacer cobro
                         //Facturar y enviar factura
                         break;
