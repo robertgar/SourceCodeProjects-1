@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="108.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\common\common.csproj" />
     <ProjectReference Include="..\connection\connection.csproj" />
   </ItemGroup>
