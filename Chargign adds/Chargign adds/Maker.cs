@@ -6,6 +6,9 @@ using System;
 using System.Text;
 using System.IO;
 using System.Security.Cryptography;
+using System.Globalization;
+
+
 
 namespace Principal {
     internal class Maker {
@@ -77,7 +80,7 @@ namespace Principal {
             js.use.query.AppendLine("    )");
             js.use.query.AppendLine(")");
 
-            js.use.query.AppendLine("select top 1");
+            js.use.query.AppendLine("select");
             js.use.query.AppendLine("    cli.CodigoCliente as CustomerCode,");
             js.use.query.AppendLine("    case");
             js.use.query.AppendLine("        when");
@@ -123,9 +126,7 @@ namespace Principal {
 
             if (tabPrincipal.Rows.Count == 0) { return; }
             int Invoice = 0;
-            String numerotarheta;
-            String anio;
-            String mes;
+            
 
             foreach (DataRow row in tabPrincipal.Rows) {
                 switch (int.Parse(row["Charging"].ToString())) {
@@ -135,15 +136,20 @@ namespace Principal {
                         break;
                     case 0:
                         //Create invoice
-                        Invoice = getNewInvoice(row["CustomerCode"].ToString(), ref js);
-                        //Invoice = 590715;
-                         js.use.query.Clear();
-                        js.use.query.Append("Select CodigoVenta,NumeroTarjeta, CodigoSeguridad,VencimientoTarjeta,TotalVenta from Venta where CodigoFactura=").AppendLine(Invoice.ToString());
+                        //Invoice = getNewInvoice(row["CustomerCode"].ToString(), ref js);
+                        Invoice = 590777;
+                        String CorreoCliente;
+                        String numerotarheta;
+                        String anio;
+                        String mes;
+                        js.use.query.Clear();
+                        js.use.query.Append("Select CodigoVenta,NumeroTarjeta, CodigoSeguridad,VencimientoTarjeta,TotalVenta,CorreoCliente from Venta where CodigoFactura=").AppendLine(Invoice.ToString());
                         DataTable tableDatosT = new DataTable();
                         js.execute.fillTable(ref js.use.query, ref tableDatosT);
                         foreach (DataRow row1 in tableDatosT.Rows)
                         {
-                            mes= row1["VencimientoTarjeta"].ToString().Substring(0, 2);
+                            CorreoCliente = row1["CorreoCliente"].ToString();
+                            mes = row1["VencimientoTarjeta"].ToString().Substring(0, 2);
                             anio = row1["VencimientoTarjeta"].ToString().Substring(2, 4);
                             numerotarheta = getNumerotarjeta(row1["NumeroTarjeta"].ToString());
                             var datos = new EnvioData(
@@ -151,11 +157,12 @@ namespace Principal {
                                 numerotarheta,
                                 mes, 
                                 anio, 
-                                row1["CodigoSeguridad"].ToString(),
+                                "",
                                 Invoice.ToString()
                                 );
                             var Rpeticio = new PagoTarjeta();
                             Rpeticio = CobroPeti.AutoCredomatic(datos);
+                            
                             if (Rpeticio.Code==100)
                             {
                                 var service = new wsGD.ServiceSoapClient();
@@ -163,6 +170,7 @@ namespace Principal {
                                  vCae = service.fuFacturar(Invoice.ToString(),"", true);
                                 if (vCae.Contains("Error"))
                                 {
+                                    Guardar_Datos_Archivo_Texto("CodigoFactura: " + Invoice + " Mensaje:" + vCae);
                                     assessedCharges[1]++;
                                 }
                                 else
@@ -172,6 +180,8 @@ namespace Principal {
                             }
                             else
                             {
+                                //getCorreo(CorreoCliente, 1, row1["NumeroTarjeta"].ToString(), Rpeticio.Response.respuestatext);
+                                Guardar_Datos_Archivo_Texto("CodigoFactura: "+Invoice+" Mensaje:"+Rpeticio.Response.respuestatext);
                                 assessedCharges[1]++;
                             }
                         }
@@ -180,6 +190,15 @@ namespace Principal {
                         break;
                     case -1:
                         assessedCharges[2]++;
+                        js.use.query.Clear();
+                        js.use.query.Append("Select NumeroTarjeta,Correo from cliente where CodigoCliente=").AppendLine(row["CustomerCode"].ToString());
+                        DataTable tableDatosT2 = new DataTable();
+                        js.execute.fillTable(ref js.use.query, ref tableDatosT2);
+                        foreach (DataRow row2 in tableDatosT2.Rows)
+                            {
+                            getCorreo(row["Correo"].ToString(), 2, row["NumeroTarjeta"].ToString(), "");
+                        }
+                            
                         //Tarjeta vencida
                         //Enviar correo y solicitar renovación de tarjeta (Ver gd-plus)
                         break;
@@ -205,7 +224,7 @@ namespace Principal {
             js.use.query.AppendLine("    _mail varchar(255),");
             js.use.query.AppendLine("    _address varchar(500),");
             js.use.query.AppendLine("    _phone varchar(50),");
-            js.use.query.AppendLine("    _nit int");
+            js.use.query.AppendLine("    _nit  varchar(25)");
             js.use.query.AppendLine(")");
             js.use.query.AppendLine("declare @card_data table(");
             js.use.query.AppendLine("    _number varchar(256),");
@@ -333,7 +352,7 @@ namespace Principal {
             js.use.query.AppendLine("    Cuotas,");
             js.use.query.AppendLine("    MontoCuota,");
             js.use.query.AppendLine("    EnPreorden,");
-            js.use.query.AppendLine("    -- CodigoSeguridad,");
+            //js.use.query.AppendLine("    -- CodigoSeguridad,");
             js.use.query.AppendLine("    CodigoRedCrediticia,");
             js.use.query.AppendLine("    CodigoTipoDeTarjeta,");
             js.use.query.AppendLine("    Pendiente,");
@@ -370,7 +389,7 @@ namespace Principal {
             js.use.query.AppendLine("        1,");
             js.use.query.AppendLine("        _total * (select ct.PorcentajeComision from CuotaTarjeta as ct where ct.CodigoRedCrediticia = 2 and ct.Cuotas = 1),");
             js.use.query.AppendLine("        0,");
-            js.use.query.AppendLine("        -- (select _code from @card_data),");
+            //js.use.query.AppendLine("        -- (select _code from @card_data),");
             js.use.query.AppendLine("        1,");
             js.use.query.AppendLine("        (select _type from @card_data),");
             js.use.query.AppendLine("        0,");
@@ -448,6 +467,84 @@ namespace Principal {
             tdes.IV = IV;
             return Encoding.UTF8.GetString(tdes.CreateDecryptor().TransformFinalBlock(buffer, 0, buffer.Length));
         }
+
+        private Boolean getCorreo(string CorreoCliente, int TipoCorreo,string tarjeta, string error)
+        {
+           String ImagenEncabezado;
+         String ImagenBarra;
+        String Mensaje;
+         Boolean Resultado;
+            String Ntarjeta;
+            try
+            {
+                Ntarjeta= getNumerotarjeta(tarjeta);
+                String DireccionCorreoOrigen = "info@guatemaladigital.com";
+                ImagenEncabezado = "https://guatemaladigital.com:3001/images/poster_correo.jpg";
+                ImagenBarra = "https://guatemaladigital.com:3001/images/CorreoEncabezado.jpg";
+                var correo = new System.Net.Mail.MailMessage();
+                correo.IsBodyHtml = true;
+                correo.From = new System.Net.Mail.MailAddress(DireccionCorreoOrigen, "GuatemalaDigital.com");
+                correo.To.Add(CorreoCliente);
+                correo.Subject = "Cobro Mensual de Anuncios";
+                Mensaje = "<table style='width:900px; border-width:1px;  border-style:solid'> " +
+            "<tr> " +
+            "<td align='center'> " +
+            "<img src='" + ImagenEncabezado + "' alt='cargando imagen' width='900px'> " +
+            "<img src='" + ImagenBarra + "' alt='cargando imagen' width='900px'> " +
+            "<p align='center' colspan='2'>";
+
+                Mensaje += "<b><h2 align='Center'> Cobro Mensual de Anuncios </h2>" + "</b>";
+                Mensaje += "<br/> <p align='justify' colspan='2'>" +
+                "Estimado Sr./ Sra.</p>  " +
+                "<ul align='left' colspan='2'> ";
+
+                if (TipoCorreo == 1) {
+                    Mensaje += " <p align='justify' colspan='2'>Lamentamos informarle que no se realizo el cobro mensual de Anuncios esto debido a que su tarjeta el sistema lo encuentra "+ error + " .<br/></p>";
+                }
+                else if (TipoCorreo == 2)
+                {
+                    Mensaje += " <p align='justify' colspan='2'>Lamentamos informarle que no se realizo el cobro mensual de Anuncios esto debido a que su tarjeta se encuentra vencida  .<br/></p>";
+                }
+                Mensaje += " <li> <b> Tarjeta registrada: </b> xxxx xxxx xxxx " + Ntarjeta.Substring(Ntarjeta.Length - 4) + " </li> </ul> " +
+ " <p align='justify' colspan='2'>Por favor, haga clic en el siguiente enlace y asocie un nueva tarjeta para el pago de mensual de Anuncios <a href='https://guatemaladigital.com:3001/Ingreso.aspx'>aquí</a>.<br/></p>";
+                Mensaje = Mensaje + "<img src='" + ImagenBarra + "' alt='cargando imagen' width='900px'> ";
+                correo.Body = Mensaje;
+                correo.IsBodyHtml = true;
+                correo.Priority = System.Net.Mail.MailPriority.Normal;
+                var smtp = new System.Net.Mail.SmtpClient();
+                String CredencialUsername = "AKIAZJ6ZLR4S2KSM7HXS";
+                String CredencialPassword = "BNkV7CfzOIopvOacNiCc0l09xicWhDGBYfaRh5ozapti";
+                smtp.Host = "email-smtp.us-east-1.amazonaws.com";
+                smtp.Port = 587;
+                smtp.EnableSsl = true;
+                smtp.Credentials = new System.Net.NetworkCredential(CredencialUsername, CredencialPassword);
+                smtp.Send(correo);
+                Resultado = true;
+            }
+            catch (Exception e) {
+                Resultado = false;
+            }
+            return Resultado;
+        }
+        private void Guardar_Datos_Archivo_Texto(string Cadena)
+        {
+            String path = "C:/inetpub/wwwroot/Sistema/CARGA/CobrosAnuncios" + DateTime.Now.Day.ToString() + DateTime.Now.Month.ToString() + ".txt";
+            if (! File.Exists(path))
+            {
+                StreamWriter sw = File.CreateText(path);
+                sw.WriteLine(DateTime.Now.ToString());
+                sw.WriteLine(Cadena);
+                sw.WriteLine(" ");
+            }
+            else
+            {
+                StreamWriter sw = File.AppendText(path);
+                sw.WriteLine(DateTime.Now.ToString());
+                sw.WriteLine(Cadena);
+                sw.WriteLine(" ");
+            }
+        }
+
 
     }
 }
