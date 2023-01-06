@@ -136,8 +136,8 @@ namespace Principal {
                         break;
                     case 0:
                         //Create invoice
-                        //Invoice = getNewInvoice(row["CustomerCode"].ToString(), ref js);
-                        Invoice = 590777;
+                        Invoice = getNewInvoice(row["CustomerCode"].ToString(), ref js);
+                        
                         String CorreoCliente;
                         String numerotarheta;
                         String anio;
