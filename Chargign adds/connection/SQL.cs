@@ -29,7 +29,7 @@ namespace connection {
             connection.Close();
         }
 
-        public String getValue(ref StringBuilder query, [Optional] string Error) {
+        public string getValue(ref StringBuilder query, [Optional] string Error) {
             fillTable(ref query, ref _buffer);
 
             try {
