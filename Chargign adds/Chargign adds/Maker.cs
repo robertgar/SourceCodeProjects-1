@@ -335,7 +335,6 @@ namespace Principal {
             js.use.query.AppendLine("    0.00,");
             js.use.query.AppendLine("    getdate()");
             js.use.query.AppendLine(")");
-
             //Insert sale
             js.use.query.AppendLine("insert into Venta(");
             js.use.query.AppendLine("    Fecha,");
@@ -417,7 +416,6 @@ namespace Principal {
             js.use.query.AppendLine("        scope_identity(),");
             js.use.query.AppendLine("        5,");
             js.use.query.AppendLine("        null");
-
             //Insert collection
             js.use.query.AppendLine("insert into Cobro(");
             js.use.query.AppendLine("    CodigoCobro,");
