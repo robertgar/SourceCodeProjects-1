@@ -464,7 +464,6 @@ namespace Principal {
         private int getMontoMinimo(string CustomerCode, ref Vars js)
         {
             js.use.query.Clear();
-            //Create variables
             js.use.query.AppendLine("SELECT");
             js.use.query.AppendLine("  count(cl.CodigoAnuncio) AS NoClicks");
             js.use.query.AppendLine("FROM");
