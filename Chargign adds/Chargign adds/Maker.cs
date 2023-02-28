@@ -136,53 +136,57 @@ namespace Principal {
                         break;
                     case 0:
                         //Create invoice
-                        Invoice = getNewInvoice(row["CustomerCode"].ToString(), ref js);
-                        
-                        String CorreoCliente;
-                        String numerotarheta;
-                        String anio;
-                        String mes;
-                        js.use.query.Clear();
-                        js.use.query.Append("Select CodigoVenta,NumeroTarjeta, CodigoSeguridad,VencimientoTarjeta,TotalVenta,CorreoCliente from Venta where CodigoFactura=").AppendLine(Invoice.ToString());
-                        DataTable tableDatosT = new DataTable();
-                        js.execute.fillTable(ref js.use.query, ref tableDatosT);
-                        foreach (DataRow row1 in tableDatosT.Rows)
+
+                        if (getMontoMinimo(row["CustomerCode"].ToString(), ref js) >= 100)
                         {
-                            CorreoCliente = row1["CorreoCliente"].ToString();
-                            mes = row1["VencimientoTarjeta"].ToString().Substring(0, 2);
-                            anio = row1["VencimientoTarjeta"].ToString().Substring(2, 4);
-                            numerotarheta = getNumerotarjeta(row1["NumeroTarjeta"].ToString());
-                            var datos = new EnvioData(
-                                row1["TotalVenta"].ToString(),
-                                numerotarheta,
-                                mes, 
-                                anio, 
-                                "",
-                                Invoice.ToString()
-                                );
-                            var Rpeticio = new PagoTarjeta();
-                            Rpeticio = CobroPeti.AutoCredomatic(datos);
-                            
-                            if (Rpeticio.Code==100)
+                            Invoice = getNewInvoice(row["CustomerCode"].ToString(), ref js);
+
+                            String CorreoCliente;
+                            String numerotarheta;
+                            String anio;
+                            String mes;
+                            js.use.query.Clear();
+                            js.use.query.Append("Select CodigoVenta,NumeroTarjeta, CodigoSeguridad,VencimientoTarjeta,TotalVenta,CorreoCliente from Venta where CodigoFactura=").AppendLine(Invoice.ToString());
+                            DataTable tableDatosT = new DataTable();
+                            js.execute.fillTable(ref js.use.query, ref tableDatosT);
+                            foreach (DataRow row1 in tableDatosT.Rows)
                             {
-                                var service = new wsGD.ServiceSoapClient();
-                                String vCae = "";
-                                 vCae = service.fuFacturar(Invoice.ToString(),"", true);
-                                if (vCae.Contains("Error"))
+                                CorreoCliente = row1["CorreoCliente"].ToString();
+                                mes = row1["VencimientoTarjeta"].ToString().Substring(0, 2);
+                                anio = row1["VencimientoTarjeta"].ToString().Substring(2, 4);
+                                numerotarheta = getNumerotarjeta(row1["NumeroTarjeta"].ToString());
+                                var datos = new EnvioData(
+                                    row1["TotalVenta"].ToString(),
+                                    numerotarheta,
+                                    mes,
+                                    anio,
+                                    "",
+                                    Invoice.ToString()
+                                    );
+                                var Rpeticio = new PagoTarjeta();
+                                Rpeticio = CobroPeti.AutoCredomatic(datos);
+
+                                if (Rpeticio.Code == 100)
                                 {
-                                    Guardar_Datos_Archivo_Texto("CodigoFactura: " + Invoice + " Mensaje:" + vCae);
-                                    assessedCharges[1]++;
+                                    var service = new wsGD.ServiceSoapClient();
+                                    String vCae = "";
+                                    vCae = service.fuFacturar(Invoice.ToString(), "", true);
+                                    if (vCae.Contains("Error"))
+                                    {
+                                        Guardar_Datos_Archivo_Texto("CodigoFactura: " + Invoice + " Mensaje:" + vCae);
+                                        assessedCharges[1]++;
+                                    }
+                                    else
+                                    {
+                                        assessedCharges[0]++;
+                                    }
                                 }
                                 else
                                 {
-                                    assessedCharges[0]++;
+                                    //getCorreo(CorreoCliente, 1, row1["NumeroTarjeta"].ToString(), Rpeticio.Response.respuestatext);
+                                    Guardar_Datos_Archivo_Texto("CodigoFactura: " + Invoice + " Mensaje:" + Rpeticio.Response.respuestatext);
+                                    assessedCharges[1]++;
                                 }
-                            }
-                            else
-                            {
-                                //getCorreo(CorreoCliente, 1, row1["NumeroTarjeta"].ToString(), Rpeticio.Response.respuestatext);
-                                Guardar_Datos_Archivo_Texto("CodigoFactura: "+Invoice+" Mensaje:"+Rpeticio.Response.respuestatext);
-                                assessedCharges[1]++;
                             }
                         }
                         //Hacer cobro
@@ -456,6 +460,27 @@ namespace Principal {
             return js.execute.getNat(ref js.use.query, -1);
         }
 
+
+        private int getMontoMinimo(string CustomerCode, ref Vars js)
+        {
+            js.use.query.Clear();
+            //Create variables
+            js.use.query.AppendLine("SELECT");
+            js.use.query.AppendLine("  count(cl.CodigoAnuncio) AS NoClicks");
+            js.use.query.AppendLine("FROM");
+            js.use.query.AppendLine("  Click AS cl");
+            js.use.query.AppendLine("  INNER JOIN Anuncio AS a ON a.CodigoAnuncio = cl.CodigoAnuncio");
+            js.use.query.AppendLine("  INNER JOIN Cliente AS c ON c.CodigoCliente = a.CodigoCliente");
+            js.use.query.AppendLine("WHERE");
+            js.use.query.AppendLine("  isnull(c.AnunciosSuspendidos, 0) = 0");
+            js.use.query.AppendLine("  AND cl.CodigoVenta IS NULL");
+            js.use.query.AppendLine("  AND isnull(a.Aprobado, 0) = 1");
+            js.use.query.AppendLine("  AND a.CodigoEstadoDeAnuncio = 1");
+            js.use.query.AppendLine("  AND c.CodigoCliente = ").AppendLine(CustomerCode);
+            js.use.query.AppendLine("GROUP BY");
+            js.use.query.AppendLine("  a.Nombre");
+            return js.execute.getNat(ref js.use.query, -1);
+        }
 
         private string getNumerotarjeta(string tarjeta)
         {
