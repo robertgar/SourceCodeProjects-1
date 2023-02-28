@@ -17,10 +17,12 @@ namespace Principal {
             public connection.SQL execute = new connection.SQL();
             public common.UseCommon use = new common.UseCommon();
         }
-        public void MakeAll(ref Boolean isSimulation) {
+        bool isSimulation;
+        public void MakeAll(ref bool isSimulation) {
+            this.isSimulation = isSimulation;
             Vars js = new Vars();
             DateTime _now = DateTime.Now;
-            int[] assessedCharges = { 0, 0, 0};
+            int[] assessedCharges = { 0, 0, 0, 0, 0 };
 
             js.slack.data.Clear();
             js.slack.data.alertTitle.Append("Alert");
@@ -31,7 +33,7 @@ namespace Principal {
 
             try {
                 TryMake(ref js, ref assessedCharges);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 js.slack.sendError(e.ToString());
             }
 
@@ -41,6 +43,8 @@ namespace Principal {
             js.slack.data.message.Append("Outstanding receivables: ").AppendLine(assessedCharges[0].ToString());
             js.slack.data.message.Append("Collections made: ").AppendLine(assessedCharges[1].ToString());
             js.slack.data.message.Append("Expired cards: ").AppendLine(assessedCharges[2].ToString());
+            js.slack.data.message.Append("Error collections: ").AppendLine(assessedCharges[3].ToString());
+            js.slack.data.message.Append("Total records: ").AppendLine(assessedCharges[4].ToString());
             js.slack.data.message.Append("Total execution time: ").Append(DateTime.Now - _now);
             js.slack.data.warningColour = js.slack.data.getColour.Green;
             js.slack.send();
@@ -52,77 +56,82 @@ namespace Principal {
         /// <param name="js"></param>
         /// <param name="assessedCharges"></param>
         private void TryMake(ref Vars js, ref int[] assessedCharges) {
-            js.use.query.Clear();
-            js.use.query.AppendLine("declare @Parameter smalldatetime = dateadd(");
-            js.use.query.AppendLine("    day, (");
-            js.use.query.AppendLine("        select");
-            js.use.query.AppendLine("            convert(int, Valor)");
-            js.use.query.AppendLine("        from");
-            js.use.query.AppendLine("            Parametro");
-            js.use.query.AppendLine("        where");
-            js.use.query.AppendLine("            CodigoParametro = 17");
-            js.use.query.AppendLine("    ), (");
-            js.use.query.AppendLine("        select");
-            js.use.query.AppendLine("            isnull(");
-            js.use.query.AppendLine("                max(v.Fecha),");
-            js.use.query.AppendLine("                dateadd(");
-            js.use.query.AppendLine("                    day,");
-            js.use.query.AppendLine("                    -(select convert(int, Valor) from Parametro where CodigoParametro = 17),");
-            js.use.query.AppendLine("                    getdate()");
-            js.use.query.AppendLine("                )");
-            js.use.query.AppendLine("            )");
-            js.use.query.AppendLine("        from");
-            js.use.query.AppendLine("            Venta as v");
-            js.use.query.AppendLine("            inner join DetalleVentaServicio as dvs on dvs.CodigoVenta = v.CodigoVenta");
-            js.use.query.AppendLine("        where");
-            js.use.query.AppendLine("            dvs.CodigoServicio = 5");
-            js.use.query.AppendLine("            and v.CodigoProducto = 0");
-            js.use.query.AppendLine("    )");
-            js.use.query.AppendLine(")");
-
+            js.use.Clear();
+            js.use.query.AppendLine("declare @Parameter int = (Select Valor from Parametro where CodigoParametro = 17)");
             js.use.query.AppendLine("select");
-            js.use.query.AppendLine("    cli.CodigoCliente as CustomerCode,");
+            js.use.query.AppendLine("    cl.CodigoCliente as CustomerCode,");
             js.use.query.AppendLine("    case");
-            js.use.query.AppendLine("        when");
-            js.use.query.AppendLine("            datediff(");
-            js.use.query.AppendLine("                month,");
-            js.use.query.AppendLine("                getdate(),");
-            js.use.query.AppendLine("                concat(");
-            js.use.query.AppendLine("                    cli.VencimientoTarjeta % 10000,");
-            js.use.query.AppendLine("                    '-',");
-            js.use.query.AppendLine("                    (cli.VencimientoTarjeta - cli.VencimientoTarjeta % 10000) / 10000,");
-            js.use.query.AppendLine("                    '-01'");
-            js.use.query.AppendLine("                )");
-            js.use.query.AppendLine("            ) = 1 then 0");
-            js.use.query.AppendLine("        when");
-            js.use.query.AppendLine("            datediff(");
-            js.use.query.AppendLine("                month,");
-            js.use.query.AppendLine("                getdate(),");
-            js.use.query.AppendLine("                concat(");
-            js.use.query.AppendLine("                    cli.VencimientoTarjeta % 10000,");
-            js.use.query.AppendLine("                    '-',");
-            js.use.query.AppendLine("                    (cli.VencimientoTarjeta - cli.VencimientoTarjeta % 10000) / 10000,");
-            js.use.query.AppendLine("                    '-01'");
-            js.use.query.AppendLine("                )");
-            js.use.query.AppendLine("            ) <= 0 then -1");
-            js.use.query.AppendLine("        else");
-            js.use.query.AppendLine("            iif(datediff(day, getdate(), @Parameter) < 1, 0, 1)");
-            js.use.query.AppendLine("    end as Charging");
+            js.use.query.AppendLine("        when datediff(");
+            js.use.query.AppendLine("            month,");
+            js.use.query.AppendLine("            getdate(),");
+            js.use.query.AppendLine("            concat(");
+            js.use.query.AppendLine("                cl.VencimientoTarjeta % 10000,");
+            js.use.query.AppendLine("                '-',");
+            js.use.query.AppendLine("                (cl.VencimientoTarjeta - cl.VencimientoTarjeta % 10000) / 10000,");
+            js.use.query.AppendLine("                '-01'");
+            js.use.query.AppendLine("            )");
+            js.use.query.AppendLine("        ) < 0 then -1");
+            js.use.query.AppendLine("        when datediff(");
+            js.use.query.AppendLine("            month,");
+            js.use.query.AppendLine("            getdate(),");
+            js.use.query.AppendLine("            concat(");
+            js.use.query.AppendLine("                cl.VencimientoTarjeta % 10000,");
+            js.use.query.AppendLine("                '-',");
+            js.use.query.AppendLine("                (cl.VencimientoTarjeta - cl.VencimientoTarjeta % 10000) / 10000,");
+            js.use.query.AppendLine("                '-01'");
+            js.use.query.AppendLine("            )");
+            js.use.query.AppendLine("        ) < 2 then 0");
+            js.use.query.AppendLine("        when datediff(");
+            js.use.query.AppendLine("            day,");
+            js.use.query.AppendLine("            getdate(),");
+            js.use.query.AppendLine("            isnull(");
+            js.use.query.AppendLine("                max(t.Fecha),");
+            js.use.query.AppendLine("                dateadd(day, -@Parameter, getdate())");
+            js.use.query.AppendLine("            )");
+            js.use.query.AppendLine("            ) >= @Parameter then 0");
+            js.use.query.AppendLine("        else 1");
+            js.use.query.AppendLine("    end as Charging,");
+            js.use.query.AppendLine("    cl.NumeroTarjeta as CardNumber,");
+            js.use.query.AppendLine("    concat(");
+            js.use.query.AppendLine("        cl.VencimientoTarjeta % 10000,");
+            js.use.query.AppendLine("        '-',");
+            js.use.query.AppendLine("        (cl.VencimientoTarjeta - cl.VencimientoTarjeta % 10000) / 10000,");
+            js.use.query.AppendLine("        '-01'");
+            js.use.query.AppendLine("    ) as ExpireDate,");
+            js.use.query.AppendLine("    cl.Correo as MailCustomer,");
+            js.use.query.AppendLine("    convert(decimal(7, 4), sum(c.CPC)) as Total");
             js.use.query.AppendLine("from");
             js.use.query.AppendLine("    Click as c");
             js.use.query.AppendLine("    inner join Anuncio as a on a.CodigoAnuncio = c.CodigoAnuncio");
-            js.use.query.AppendLine("    inner join Cliente as cli on cli.CodigoCliente = a.CodigoCliente");
+            js.use.query.AppendLine("    inner join Cliente as cl on cl.CodigoCliente = a.CodigoCliente");
+            js.use.query.AppendLine("    left join(");
+            js.use.query.AppendLine("        select");
+            js.use.query.AppendLine("            v.CodigoCliente,");
+            js.use.query.AppendLine("            max(v.Fecha) as Fecha");
+            js.use.query.AppendLine("        from");
+            js.use.query.AppendLine("            Venta as v");
+            js.use.query.AppendLine("            inner join DetalleVentaServicio as dvs");
+            js.use.query.AppendLine("                on dvs.CodigoVenta = v.CodigoVenta");
+            js.use.query.AppendLine("        where");
+            js.use.query.AppendLine("            v.CodigoProducto = 0");
+            js.use.query.AppendLine("            and dvs.CodigoServicio = 5");
+            js.use.query.AppendLine("        group by");
+            js.use.query.AppendLine("            v.CodigoCliente");
+            js.use.query.AppendLine("    ) as t on t.CodigoCliente = cl.CodigoCliente");
             js.use.query.AppendLine("where");
-            js.use.query.AppendLine("    c.CodigoVenta is null");
-            js.use.query.AppendLine("    and isnull(cli.AnunciosSuspendidos, 0) = 0");
+            js.use.query.AppendLine("    a.CodigoEstadoDeAnuncio = 1");
             js.use.query.AppendLine("    and isnull(a.Aprobado, 0) = 1");
-            js.use.query.AppendLine("    and a.CodigoEstadoDeAnuncio = 1");
+            js.use.query.AppendLine("    and c.CodigoVenta is null");
+            js.use.query.AppendLine("    and isnull(cl.AnunciosSuspendidos, 0) = 0");
             js.use.query.AppendLine("group by");
-            js.use.query.AppendLine("    cli.CodigoCliente,");
-            js.use.query.AppendLine("    cli.VencimientoTarjeta");
+            js.use.query.AppendLine("    cl.CodigoCliente,");
+            js.use.query.AppendLine("    cl.VencimientoTarjeta,");
+            js.use.query.AppendLine("    cl.NumeroTarjeta,");
+            js.use.query.AppendLine("    cl.Correo");
 
             DataTable tabPrincipal = new DataTable();
             js.execute.fillTable(ref js.use.query, ref tabPrincipal);
+            assessedCharges[4] = tabPrincipal.Rows.Count;
 
             if (tabPrincipal.Rows.Count == 0) { return; }
             int Invoice = 0;
@@ -136,61 +145,12 @@ namespace Principal {
                         break;
                     case 0:
                         //Create invoice
-
+                        //Make collect
+                        //Facturar y enviar factura
                         if (getMontoMinimo(row["CustomerCode"].ToString(), ref js) >= 100)
                         {
-                            Invoice = getNewInvoice(row["CustomerCode"].ToString(), ref js);
-
-                            String CorreoCliente;
-                            String numerotarheta;
-                            String anio;
-                            String mes;
-                            js.use.query.Clear();
-                            js.use.query.Append("Select CodigoVenta,NumeroTarjeta, CodigoSeguridad,VencimientoTarjeta,TotalVenta,CorreoCliente from Venta where CodigoFactura=").AppendLine(Invoice.ToString());
-                            DataTable tableDatosT = new DataTable();
-                            js.execute.fillTable(ref js.use.query, ref tableDatosT);
-                            foreach (DataRow row1 in tableDatosT.Rows)
-                            {
-                                CorreoCliente = row1["CorreoCliente"].ToString();
-                                mes = row1["VencimientoTarjeta"].ToString().Substring(0, 2);
-                                anio = row1["VencimientoTarjeta"].ToString().Substring(2, 4);
-                                numerotarheta = getNumerotarjeta(row1["NumeroTarjeta"].ToString());
-                                var datos = new EnvioData(
-                                    row1["TotalVenta"].ToString(),
-                                    numerotarheta,
-                                    mes,
-                                    anio,
-                                    "",
-                                    Invoice.ToString()
-                                    );
-                                var Rpeticio = new PagoTarjeta();
-                                Rpeticio = CobroPeti.AutoCredomatic(datos);
-
-                                if (Rpeticio.Code == 100)
-                                {
-                                    var service = new wsGD.ServiceSoapClient();
-                                    String vCae = "";
-                                    vCae = service.fuFacturar(Invoice.ToString(), "", true);
-                                    if (vCae.Contains("Error"))
-                                    {
-                                        Guardar_Datos_Archivo_Texto("CodigoFactura: " + Invoice + " Mensaje:" + vCae);
-                                        assessedCharges[1]++;
-                                    }
-                                    else
-                                    {
-                                        assessedCharges[0]++;
-                                    }
-                                }
-                                else
-                                {
-                                    //getCorreo(CorreoCliente, 1, row1["NumeroTarjeta"].ToString(), Rpeticio.Response.respuestatext);
-                                    Guardar_Datos_Archivo_Texto("CodigoFactura: " + Invoice + " Mensaje:" + Rpeticio.Response.respuestatext);
-                                    assessedCharges[1]++;
-                                }
-                            }
+                        ChargingAdd(row, ref js, ref assessedCharges);
                         }
-                        //Hacer cobro
-                        //Facturar y enviar factura
                         break;
                     case -1:
                         assessedCharges[2]++;
@@ -205,9 +165,44 @@ namespace Principal {
                             
                         //Tarjeta vencida
                         //Enviar correo y solicitar renovación de tarjeta (Ver gd-plus)
+                        string result = sentMailCardExpire(row["MailCustomer"].ToString(), row["CardNumber"].ToString(), ref js);
+                        if (!result.Contains("Error:")) { continue; }
+
+                        js.slack.sendError(result);
                         break;
                 }
             }
+        }
+
+        private void ChargingAdd(DataRow row, ref Vars js, ref int[] assessedCharges) {
+            string Invoice = getNewInvoice(row["CustomerCode"].ToString(), ref js);
+            string _cardNumer = getNumerotarjeta(row["CardNumber"].ToString());
+            string _year = DateTime.Parse(row["ExpireDate"].ToString()).Year.ToString();
+            string _month = DateTime.Parse(row["ExpireDate"].ToString()).Month.ToString();
+            string _total = row["Total"].ToString();
+
+            EnvioData _data = new EnvioData(
+                _total,
+                _cardNumer,
+                _month,
+                _year,
+                "",
+                Invoice
+            );
+            PagoTarjeta _payment = CobroPeti.AutoCredomatic(_data);
+            string result;
+
+            if (_payment.Code == 100) {
+                var service = new wsGD.ServiceSoapClient();
+                result = service.fuFacturar(Invoice.ToString(), "", true);
+
+                assessedCharges[result.Contains("Error") ? 3 : 1]++;
+            } else {
+                result = _payment.Response.respuestatext;
+                assessedCharges[1]++;
+            }
+
+            Guardar_Datos_Archivo_Texto("CodigoFactura: " + Invoice + " Mensaje:" + result);
         }
 
         /// <summary>
@@ -217,8 +212,9 @@ namespace Principal {
         /// <param name="CustomerCode"/>
         /// <param name="js"/>
         /// <returns></returns>
-        private int getNewInvoice(string CustomerCode, ref Vars js) {
-            js.use.query.Clear();
+        private string getNewInvoice(string CustomerCode, ref Vars js) {
+            js.use.Clear();
+            js.use.query.AppendLine("begin tran begin try");
             //Create variables
             js.use.query.Append("declare @CustomerCode int = ").AppendLine(CustomerCode);
             js.use.query.AppendLine("declare @InvoiceCode int = (select Max(CodigoFactura) + 1 from Factura)");
@@ -453,9 +449,111 @@ namespace Principal {
             js.use.query.AppendLine("    0");
             js.use.query.AppendLine(")");
 
-            js.use.query.AppendLine("select @InvoiceCode as InvoiceCode");
+            js.use.query.AppendLine(isSimulation ? "rollback" : "commit");
+            js.use.query.AppendLine("    select convert(varchar(20), @InvoiceCode) as InvoiceCode");
+            js.use.query.AppendLine("end try begin catch");
+            js.use.query.AppendLine("    rollback");
+            js.use.query.AppendLine("    select 'Error:' + ERROR_MESSAGE()");
+            js.use.query.AppendLine("end try");
 
-            return js.execute.getNat(ref js.use.query, -1);
+            return js.execute.getValue(ref js.use.query);
+        }
+
+
+        private string getNumerotarjeta(string tarjeta) {
+            byte[] IV = ASCIIEncoding.ASCII.GetBytes("8 @GD b!");
+            byte[] EncryptionKey = Convert.FromBase64String("MTIzNDU2Nzg5MDEyMzQ1000000000000");
+            byte[] buffer = Convert.FromBase64String(tarjeta);
+            TripleDESCryptoServiceProvider tdes = new TripleDESCryptoServiceProvider();
+            tdes.Key = EncryptionKey;
+            tdes.IV = IV;
+            return Encoding.UTF8.GetString(tdes.CreateDecryptor().TransformFinalBlock(buffer, 0, buffer.Length));
+        }
+
+        private string sentMailCardExpire(
+            string CorreoCliente,
+            string tarjeta,
+            ref Vars js
+            ) {
+            string ImagenEncabezado;
+            string ImagenBarra;
+            StringBuilder msg = new StringBuilder();
+            string Ntarjeta;
+            CorreoCliente = isSimulation ? "tec.desarrollo15.gtd@gmail.com" : CorreoCliente;
+
+            try {
+                Ntarjeta = getNumerotarjeta(tarjeta);
+
+                js.use.Clear();
+                js.use.query.AppendLine("select Valor from Parametro where CodigoParametro = 4");
+
+                string DireccionCorreoOrigen = js.execute.getValue(ref js.use.query);
+                ImagenEncabezado = "https://guatemaladigital.com:3001/images/poster_correo.jpg";
+                ImagenBarra = "https://guatemaladigital.com:3001/images/CorreoEncabezado.jpg";
+
+                msg.AppendLine("<table style='width:900px; border-width:1px;  border-style:solid'>");
+                msg.AppendLine("    <tr>");
+                msg.AppendLine("        <td align='center'>");
+                msg.AppendLine("            <img src='" + ImagenEncabezado + "' alt='cargando imagen' width='900px'>");
+                msg.AppendLine("            <img src='" + ImagenBarra + "' alt='cargando imagen' width='900px'>");
+                msg.AppendLine("            <p align='center' colspan='2'>");
+                msg.AppendLine("                <b>");
+                msg.AppendLine("                    <h2 align='Center'> Cobro Mensual de Anuncios</h2>");
+                msg.AppendLine("                </b>");
+                msg.AppendLine("                <br/>");
+                msg.AppendLine("                <p align='justify' colspan='2'>Estimado Sr./ Sra.</p>");
+                msg.AppendLine("                <ul align='left' colspan='2'>");
+                msg.AppendLine("                    <p align='justify' colspan='2'>");
+                msg.AppendLine("                        Lamentamos informarle que no se realizo el cobro mensual de Anuncios, esto debido a que su tarjeta se encuentra vencida.");
+                msg.AppendLine("                        <br/>");
+                msg.AppendLine("                    </p>");
+                msg.AppendLine("                    <li>");
+                msg.AppendLine("                        <b> Tarjeta registrada: </b>");
+                msg.AppendLine("                        xxxx xxxx xxxx " + Ntarjeta.Substring(Ntarjeta.Length - 4));
+                msg.AppendLine("                    </li>");
+                msg.AppendLine("                </ul>");
+                msg.AppendLine("                <p align='justify' colspan='2'>");
+                msg.AppendLine("                    Por favor, haga clic en el siguiente enlace y asocie un nueva tarjeta para el pago de mensual de Anuncios");
+                msg.AppendLine("                    <a href='https://guatemaladigital.com:3001/Ingreso.aspx'>aquí</a>");
+                msg.AppendLine("                    <br/>");
+                msg.AppendLine("                </p>");
+                msg.AppendLine("                <img src='" + ImagenBarra + "' alt='cargando imagen' width='900px'>");
+                msg.AppendLine("            </p>");
+                msg.AppendLine("        </td>");
+                msg.AppendLine("    </tr>");
+                msg.AppendLine("</table>");
+
+                var correo = new System.Net.Mail.MailMessage();
+                correo.IsBodyHtml = true;
+                correo.From = new System.Net.Mail.MailAddress(DireccionCorreoOrigen, "GuatemalaDigital.com");
+                correo.To.Add(CorreoCliente);
+                correo.Subject = "Cobro Mensual de Anuncios";
+                correo.Body = msg.ToString();
+                correo.IsBodyHtml = true;
+                correo.Priority = System.Net.Mail.MailPriority.Normal;
+                
+                string CredencialUsername = "AKIAZJ6ZLR4S2KSM7HXS";
+                string CredencialPassword = "BNkV7CfzOIopvOacNiCc0l09xicWhDGBYfaRh5ozapti";
+
+                var smtp = new System.Net.Mail.SmtpClient();
+                smtp.Host = "email-smtp.us-east-1.amazonaws.com";
+                smtp.Port = 587;
+                smtp.EnableSsl = true;
+                smtp.Credentials = new System.Net.NetworkCredential(CredencialUsername, CredencialPassword);
+                smtp.Send(correo);
+
+                return "Succesfully";
+            } catch (Exception e) {
+                return "Error: No se pudo enviar correo por tarjeta vencida. Correo cliente: " + CorreoCliente + " " + e.Message;
+            }
+        }
+        private void Guardar_Datos_Archivo_Texto(string Cadena) {
+            string path = "C:/inetpub/wwwroot/Sistema/CARGA/CobrosAnuncios" + DateTime.Now.Day.ToString() + DateTime.Now.Month.ToString() + ".txt";
+
+            StreamWriter logs = !File.Exists(path) ? File.CreateText(path) : File.AppendText(path);
+            logs.WriteLine(DateTime.Now.ToString());
+            logs.WriteLine(Cadena);
+            logs.WriteLine(" ");
         }
 
 
